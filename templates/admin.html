@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | KwikChat</title>
+    <link rel="website icon" type="png" href="/static/KwikChat_logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --success-color: #4caf50;
+            --danger-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196f3;
+            
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #333333;
+            
+            --primary-color: #5c7cfa;
+            --primary-dark: #4a6cf7;
+            
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .theme-toggle, .logout-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+        }
+
+        .theme-toggle:hover, .logout-btn:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] .theme-toggle:hover, 
+        [data-theme="dark"] .logout-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card i {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .stat-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .stat-card-footer {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .stat-card-footer i {
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            background: none;
+            width: auto;
+            height: auto;
+            color: var(--text-secondary);
+        }
+
+        /* Tables */
+        .table-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2.5rem;
+            overflow-x: auto;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title i {
+            color: var(--primary-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1.1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        th {
+            background-color: rgba(67, 97, 238, 0.1);
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] tr:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-right: 0.5rem;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .view-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .view-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Message Section */
+        .message-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .message-form, .message-output {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.8rem;
+            box-shadow: var(--card-shadow);
+            /* display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            flex-direction: column; */
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.85rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            padding: 0.85rem 1.75rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+            transform: translateY(-2px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .message-output {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message-item {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .message-item:hover {
+            background-color: rgba(0, 0, 0, 0.03);
+        }
+
+        [data-theme="dark"] .message-item:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        .message-item:last-child {
+            border-bottom: none;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .message-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .message-content {
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* Password toggle */
+        .password-toggle-btn {
+            background-color: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            margin-left: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .password-text {
+            font-family: monospace;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+        .message-filter-info
+        {
+            text-align: center;
+            justify-content: center;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+
+            .user-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .message-form, .message-output, .table-container {
+                padding: 1.25rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        [data-theme="dark"] ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+            <div class="user-actions">
+                <button class="theme-toggle" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i> <span>Dark Mode</span>
+                </button>
+                <a href="{{ url_for('admin_logout') }}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <h3>{{ users|length }}</h3>
+                        <p>Total Users</p>
+                    </div>
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-card-footer">
+                    <i class="fas fa-clock"></i>
+                    <span>Updated just now</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <h3>{{ total_messages }}</h3>
+                        <p>Total Messages</p>
+                    </div>
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="stat-card-footer">
+                    <i class="fas fa-clock"></i>
+                    <span>Updated just now</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <h3>{{ active_users }}</h3>
+                        <p>Active Users (24h)</p>
+                    </div>
+                    <i class="fas fa-user-clock"></i>
+                </div>
+                <div class="stat-card-footer">
+                    <i class="fas fa-clock"></i>
+                    <span>Updated just now</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+            <h3>{{ "%.2f"|format(storage_used) }} MB</h3>
+            <p>Storage Used ({{ storage_used_kb }} KB)</p>  <!-- Optional KB display -->
+                    </div>
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="stat-card-footer">
+                    <i class="fas fa-clock"></i>
+                    <span>Updated just now</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="table-container">
+            <h2 class="section-title"><i class="fas fa-users-cog"></i> User Management</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Password</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if users|length > 0 %}
+                        {% for user in users %}
+                        <tr data-user-id="{{ user[0] }}">
+                            <td>{{ user[0] }}</td>
+                            <td>{{ user[1] }}</td>
+                            <td>
+                                <span class="password-text">••••••••</span>
+                                <button class="password-toggle-btn" onclick="togglePassword(this, '{{ user[2] }}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <button class="action-btn delete-btn" onclick="confirmDelete('{{ user[0] }}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                                <button class="action-btn view-btn" onclick="viewUserDetails('{{ user[0] }}')">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                                <i class="fas fa-user-slash" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                                <div>No users found</div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Message Section -->
+        <div class="message-section">
+            <div class="message-form">
+                <h2 class="section-title"><i class="fas fa-search"></i> Message Lookup</h2>
+                <div class="form-group">
+                    <label for="sender">User 1</label>
+                    <input type="text" id="sender" class="form-control" placeholder="Enter the username">
+                    <label for="receiver">User 2</label>
+                    <input type="text" id="receiver" class="form-control" placeholder="Enter the username">
+                </div>
+                <div class="form-group">
+                <label for="timeFilter">Time Period</label>
+                <select id="timeFilter" class="form-control">
+                    <!-- <option value="today">Today</option>
+                    <option value="week">Last 7 Days</option>
+                    <option value="month">Last 30 Days</option> -->
+                    <option value="all" selected>All Time</option>
+                </select>
+            </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="fetchMessages()">
+                        <i class="fas fa-search"></i> Search Messages
+                    </button>
+                    <button class="btn btn-danger" onclick="clearMessages()">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+            </div>
+            <div class="message-output" id="messagesOutput">
+                <h3 class="section-title"><i class="fas fa-envelope"></i> Message Results</h3>
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>Enter search criteria to view messages</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize theme from localStorage or prefer-color-scheme
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.body.setAttribute('data-theme', 'dark');
+                document.querySelector('.theme-toggle i').className = 'fas fa-sun';
+                document.querySelector('.theme-toggle span').textContent = 'Light Mode';
+            }
+        }
+
+        // Toggle theme
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (body.hasAttribute('data-theme')) {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i> <span>Dark Mode</span>';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i> <span>Light Mode</span>';
+            }
+        }
+
+        // Toggle password visibility for individual user
+        function togglePassword(button, password) {
+            const row = button.closest('tr');
+            const passwordText = row.querySelector('.password-text');
+            const icon = button.querySelector('i');
+            
+            if (passwordText.textContent === '••••••••') {
+                passwordText.textContent = password;
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                passwordText.textContent = '••••••••';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // View user details
+        function viewUserDetails(userId) {
+            alert(`Viewing details for user ID: ${userId}`);
+            // In a real application, you would fetch user details and display them
+            // fetch(`/user_details/${userId}`)
+            //     .then(response => response.json())
+            //     .then(data => showUserDetailsModal(data));
+        }
+
+      // Confirm user deletion
+function confirmDelete(userId) {
+    if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+        const rowToDelete = document.querySelector(`tr[data-user-id="${userId}"]`);
+        
+        fetch(`/delete_user/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('User deleted successfully', 'success');
+                
+                // Remove the row from the table
+                if (rowToDelete) {
+                    rowToDelete.remove();
+                }
+                
+                // Update the total users count
+                updateUserCount();
+                
+                // If this was the last user, show the empty state
+                checkEmptyState();
+            } else {
+                showNotification('Error deleting user', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error deleting user', 'error');
+        });
+    }
+}
+
+// Update the user count in the stats card
+function updateUserCount() {
+    const userCountElement = document.querySelector('.stat-card h3');
+    if (userCountElement) {
+        const currentCount = parseInt(userCountElement.textContent);
+        userCountElement.textContent = currentCount - 1;
+    }
+}
+
+// Check if the table is empty and show the empty state if needed
+function checkEmptyState() {
+    const tableBody = document.querySelector('table tbody');
+    const rows = tableBody.querySelectorAll('tr:not([style*="display: none"])');
+    
+    if (rows.length === 1 && rows[0].querySelector('.empty-state')) {
+        // Already showing empty state
+        return;
+    }
+    
+    if (rows.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <i class="fas fa-user-slash" style="font-size: 1.5rem; margin-bottom: 0.5rem;"></i>
+                    <div>No users found</div>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+///////////////////msg.////////
+function fetchMessages() {
+    const sender = document.getElementById('sender').value;
+    const receiver = document.getElementById('receiver').value;
+    const timeFilter = document.getElementById('timeFilter').value;
+    const messagesOutput = document.getElementById('messagesOutput');
+
+    // Validate inputs
+    if (!sender && !receiver) {
+        showNotification('Please enter at least one username (sender or receiver)', 'error');
+        return;
+    }
+
+    // Show loading state
+    messagesOutput.innerHTML = `
+        <h3 class="section-title"><i class="fas fa-envelope"></i> Message Results</h3>
+        <div class="empty-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading messages...</p>
+        </div>
+    `;
+
+    // Add timeout handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (sender) params.append('sender', sender);
+    if (receiver) params.append('receiver', receiver);
+    params.append('timeFilter', timeFilter);
+
+    fetch(`/fetch_user_messages?${params.toString()}`, {
+        signal: controller.signal
+    })
+    .then(response => {
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        renderMessages(data, timeFilter);
+    })
+    .catch(error => {
+        clearTimeout(timeoutId);
+        console.error('Error fetching messages:', error);
+        let errorMessage = 'Error fetching messages. Please try again.';
+        
+        if (error.name === 'AbortError') {
+            errorMessage = 'Request timed out. Please try again.';
+        }
+        
+        messagesOutput.innerHTML = `
+            <h3 class="section-title"><i class="fas fa-envelope"></i> Message Results</h3>
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>${errorMessage}</p>
+            </div>
+        `;
+    });
+}
+
+function renderMessages(data, timeFilter) {
+    const messagesOutput = document.getElementById('messagesOutput');
+    
+    // Create header with filter info
+    let timeFilterText = '';
+    switch(timeFilter) {
+        case 'today': timeFilterText = 'from Today'; break;
+        case 'week': timeFilterText = 'from Last 7 Days'; break;
+        case 'month': timeFilterText = 'from Last 30 Days'; break;
+        default: timeFilterText = '';
+    }
+    
+    messagesOutput.innerHTML = `
+        <h3 class="section-title"><i class="fas fa-envelope"></i> Message Results ${timeFilterText}</h3>
+        <div class="message-filter-info">
+            Total ${data.length} ${data.length === 1 ? "message" : "messages"} ${timeFilterText.toLowerCase()}
+        </div>
+    `;
+    
+    if (!data || data.length === 0) {
+        messagesOutput.innerHTML += `
+            <div class="empty-state">
+                <i class="fas fa-comment-slash"></i>
+                <p>No messages found for the selected criteria</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Group messages by date
+    const groupedMessages = groupMessagesByDate(data);
+    
+    // Create a document fragment for better performance
+    const fragment = document.createDocumentFragment();
+    
+    // Add each date group
+    for (const [date, messages] of Object.entries(groupedMessages)) {
+        const dateHeader = document.createElement('div');
+        dateHeader.className = 'message-date-header';
+        dateHeader.textContent = formatDateHeader(date);
+        fragment.appendChild(dateHeader);
+        
+        messages.forEach(msg => {
+            const messageItem = document.createElement('div');
+            messageItem.className = 'message-item';
+            messageItem.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">From: ${msg.sender || 'Unknown'}</span>
+
+                    <span class="message-time">${formatTime(msg.timestamp)}</span>
+                </div>
+                <div class="message-content">${msg.message || 'No content'}</div>
+            `;
+            fragment.appendChild(messageItem);
+        });
+    }
+    
+    messagesOutput.appendChild(fragment);
+}
+
+// Helper functions
+function groupMessagesByDate(messages) {
+    return messages.reduce((groups, message) => {
+        const date = message.timestamp.split('T')[0]; // Extract date part
+        if (!groups[date]) {
+            groups[date] = [];
+        }
+        groups[date].push(message);
+        return groups;
+    }, {});
+}
+
+function formatDateHeader(dateString) {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+    } else if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+    } else {
+        return date.toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    }
+}
+
+function formatTime(timestamp) {
+    if (!timestamp) return 'No timestamp';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+    });
+}
+
+//////////////////////
+        // Clear messages
+        function clearMessages() {
+            document.getElementById('sender').value = '';
+            document.getElementById('receiver').value = '';
+            document.getElementById('messagesOutput').innerHTML = `
+                <h3 class="section-title"><i class="fas fa-envelope"></i> Message Results</h3>
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>Enter search criteria to view messages</p>
+                </div>
+            `;
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        // Initialize theme when page loads
+        document.addEventListener('DOMContentLoaded', initTheme);
+
+
+        /////////////ACTIVE USERS////////////////
+
+
+        socket.on('user_online', function(data) {
+    updateActiveUsersCount();
+});
+
+socket.on('user_offline', function(data) {
+    updateActiveUsersCount();
+});
+
+function updateActiveUsersCount() {
+    fetch('/get_active_users_count')
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('.active-users-count').textContent = data.count;
+        });
+}
+
+// Initial call
+updateActiveUsersCount();
+    </script>
+</body>
+</html>

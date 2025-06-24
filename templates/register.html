@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | KwikChat</title>
+    <link rel="website icon" type="png" href="/static/KwikChat_logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0f0f17;
+            color: #f5f5f7;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 0;
+        }
+
+        .background-shapes {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.15;
+        }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            background: #4a22bd;
+            top: -100px;
+            left: -100px;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            background: #22bd9d;
+            bottom: -50px;
+            right: -50px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+            z-index: 1;
+        }
+
+        .register-card {
+            background-color: rgba(25, 25, 37, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .register-header {
+            padding: 2.5rem 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #4a22bd, #22bd9d);
+            border-radius: 18px;
+            transform: rotate(10deg);
+        }
+
+        .logo-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .app-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #4a22bd, #22bd9d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .app-tagline {
+            font-size: 1rem;
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        .register-body {
+            padding: 1rem 2.5rem 2.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1rem;
+            font-weight: 500;
+            transform-origin: left top;
+            transition: all 0.2s ease;
+            color: rgba(245, 245, 247, 0.7);
+        }
+
+        .form-label span {
+            color: #22bd9d;
+            margin-left: 2px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1.5rem 0 0.5rem;
+            border: none;
+            border-bottom: 2px solid rgba(245, 245, 247, 0.2);
+            background-color: transparent;
+            color: #f5f5f7;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #22bd9d;
+        }
+
+        .form-input:focus + .form-label,
+        .form-input:not(:placeholder-shown) + .form-label {
+            transform: translateY(-1rem) scale(0.8);
+            color: #22bd9d;
+        }
+
+        .form-input::placeholder {
+            color: rgb(65, 65, 65);
+            font-size: 14px;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 0;
+            top: 1.5rem;
+            color: rgba(245, 245, 247, 0.5);
+        }
+
+        .file-upload-container {
+            margin-top: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .file-label {
+            display: inline-block;
+            width: auto;
+            padding: 0.7rem 1.2rem;
+            background: linear-gradient(135deg, #4a22bd25, #22bd9d25);
+            border: 1px solid rgba(245, 245, 247, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-label:hover {
+            background: linear-gradient(135deg, #4a22bd40, #22bd9d40);
+            border-color: rgba(245, 245, 247, 0.3);
+        }
+
+        #profilePic {
+            display: none;
+        }
+
+        #file-name {
+            display: inline-block;
+            margin-left: 1rem;
+            font-size: 0.9rem;
+            color: rgba(245, 245, 247, 0.7);
+            text-overflow: none;
+            word-break: break-all;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4a22bd, #22bd9d);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(74, 34, 189, 0.2);
+        }
+
+        .register-btn:active {
+            transform: translateY(0);
+        }
+
+        .register-btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .register-btn:hover::after {
+            left: 100%;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.95rem;
+            color: rgba(245, 245, 247, 0.7);
+        }
+
+        .login-link a {
+            color: #22bd9d;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .login-link a:hover {
+            color: #4a22bd;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .register-header,
+            .register-body {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+        .alert
+        {
+            color:rgb(255, 66, 66);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <div class="container">
+        <div class="register-card">
+            <div class="register-header">
+                <h1 class="app-name">KwikChat</h1>
+                <p class="app-tagline">Create your account and start messaging</p>
+            </div>
+            <div class="register-body">
+                <form action="/register" id="registerForm" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="text" id="username" name="username" class="form-input" placeholder="" required pattern="^[A-Za-z_ ]+$" title="Username can only contain letters, underscores, and spaces">
+
+                        <label for="username" class="form-label">Username<span>*</span></label>
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    
+                    <div class="file-upload-container">
+                        <label for="profilePic" class="file-label">Choose Profile Picture<span>*</span></label>
+                        <span id="file-name">No file chosen</span>
+                        <input type="file" id="profilePic" name="profile_picture" accept="image/*" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" class="form-input" placeholder="" required pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$" title="Please enter a valid Gmail address (e.g., user@gmail.com)">
+                 
+                        <label for="email" class="form-label">Email<span>*</span></label>
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 4H20C21.1 4 22 4.9 22 6V18C22 19.1 21.1 20 20 20H4C2.9 20 2 19.1 2 18V6C2 4.9 2.9 4 4 4Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M22 6L12 13L2 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Use Strong Password" required>
+                        <label for="password" class="form-label">Password<span>*</span></label>
+                        <svg class="input-icon toggle-password" width="20" height="20" viewBox="0 0 24 24" fill="none"xmlns="http://www.w3.org/2000/svg" style="cursor: pointer;">
+                            <path d="M19 11H5C3.89543 11 3 11.8954 3 13V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V13C21 11.8954 20.1046 11 19 11Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    
+                    <button type="submit" class="register-btn">Sign Up</button>
+                    
+                    <div class="login-link">
+                        Already have an account? <a href="/login">Sign In</a>
+                    </div>
+                </form>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+    <script>
+
+
+            document.getElementById("profilePic").addEventListener("change", function() {
+            let fileName = this.files.length > 0 ? this.files[0].name : "No file chosen";
+            document.getElementById("file-name").textContent = fileName;
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            let alerts = document.querySelectorAll(".alert");
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = "0";
+                setTimeout(() => alert.remove(), 500); // Removes the alert completely after fading
+            });
+        }, 3000); // 3 seconds delay
+    });
+
+
+        const passwordInput = document.getElementById('password');
+    const togglePasswordIcon = document.querySelector('.toggle-password');
+
+    togglePasswordIcon.addEventListener('click', () => {
+        const currentType = passwordInput.getAttribute('type');
+        passwordInput.setAttribute('type', currentType === 'password' ? 'text' : 'password');
+    });
+    </script>
+</body>
+</html>
+

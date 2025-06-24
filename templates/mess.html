@@ -1,0 +1,35 @@
+        <div class="message-section">
+            <div class="message-form">
+                <h2 class="section-title"><i class="fas fa-search"></i> Message Lookup</h2>
+                <div class="form-group">
+                    <label for="sender">User 1</label>
+                    <input type="text" id="sender" class="form-control" placeholder="Enter the username">
+                    <label for="receiver">User 2</label>
+                    <input type="text" id="receiver" class="form-control" placeholder="Enter the username">
+                </div>
+                <div class="form-group">
+                <label for="timeFilter">Time Period</label>
+                <select id="timeFilter" class="form-control">
+                    <!-- <option value="today">Today</option>
+                    <option value="week">Last 7 Days</option>
+                    <option value="month">Last 30 Days</option> -->
+                    <option value="all" selected>All Time</option>
+                </select>
+            </div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="fetchMessages()">
+                        <i class="fas fa-search"></i> Search Messages
+                    </button>
+                    <button class="btn btn-danger" onclick="clearMessages()">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+            </div>
+            <div class="message-output" id="messagesOutput">
+                <h3 class="section-title"><i class="fas fa-envelope"></i> Message Results</h3>
+                <div class="empty-state">
+                    <i class="fas fa-comment-slash"></i>
+                    <p>Enter search criteria to view messages</p>
+                </div>
+            </div>
+        </div>

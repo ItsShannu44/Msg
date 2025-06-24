@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | KwikChat</title>
+    <link rel="website icon" type="png" href="/static/KwikChat_logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: #0f0f17;
+            color: #f5f5f7;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .background-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.15;
+        }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            background: #4a22bd;
+            top: -100px;
+            left: -100px;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            background: #22bd9d;
+            bottom: -50px;
+            right: -50px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 2rem;
+            z-index: 1;
+        }
+
+        .login-card {
+            background-color: rgba(25, 25, 37, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        .login-header {
+            padding: 2.5rem 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .logo-container {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            margin-bottom: 1rem;
+        }
+
+        .logo-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 18px;
+
+        }
+        .logo
+        {
+            width:70px;
+            height:50px;
+        }
+        .logo-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .app-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #4a22bd, #22bd9d);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .app-tagline {
+            font-size: 1rem;
+            opacity: 0.7;
+            text-align: center;
+        }
+
+        .login-body {
+            padding: 1rem 2.5rem 2.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1rem;
+            font-weight: 500;
+            transform-origin: left top;
+            transition: all 0.2s ease;
+            color: rgba(245, 245, 247, 0.7);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1.5rem 0 0.5rem;
+            border: none;
+            border-bottom: 2px solid rgba(245, 245, 247, 0.2);
+            background-color: transparent;
+            color: #f5f5f7;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #22bd9d;
+        }
+
+        .form-input:focus + .form-label,
+        .form-input:not(:placeholder-shown) + .form-label {
+            transform: translateY(-1rem) scale(0.8);
+            color: #22bd9d;
+        }
+
+        .form-input::placeholder {
+            color: transparent;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 0;
+            top: 1.5rem;
+            color: rgba(245, 245, 247, 0.5);
+        }
+
+        .extra-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .remember-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .custom-checkbox {
+            position: relative;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            margin-right: 0.5rem;
+        }
+
+        .custom-checkbox input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 16px;
+            height: 16px;
+            background-color: transparent;
+            border: 2px solid rgba(245, 245, 247, 0.3);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox input:checked ~ .checkmark {
+            background-color: #22bd9d;
+            border-color: #22bd9d;
+        }
+
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        .custom-checkbox input:checked ~ .checkmark:after {
+            display: block;
+            left: 5px;
+            top: 1px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .remember-text {
+            font-size: 0.9rem;
+            color: rgba(245, 245, 247, 0.7);
+        }
+
+        .forgot-link {
+            color: #22bd9d;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .forgot-link:hover {
+            color: #4a22bd;
+            text-decoration: underline;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4a22bd, #22bd9d);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(74, 34, 189, 0.2);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .login-btn:hover::after {
+            left: 100%;
+        }
+
+        .signup-link {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.95rem;
+            color: rgba(245, 245, 247, 0.7);
+        }
+
+        .signup-link a {
+            color: #22bd9d;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .signup-link a:hover {
+            color: #4a22bd;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .login-header,
+            .login-body {
+                padding-left: 1.5rem;
+                padding-right: 1.5rem;
+            }
+        }
+        .alert
+        {
+            color:rgb(255, 66, 66);
+            font-size: 14px;
+        }
+        .form-label span {
+            color: #22bd9d;
+            margin-left: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+    </div>
+
+    <div class="container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo-container">
+                    <div class="logo-bg"><img src="static/KwikChat_logo.png" class="logo" alt="KwikChat"></div>
+                    <div class="logo-icon"><img src="" alt=""></div>
+                </div>
+                <h1 class="app-name">KwikChat</h1>
+                <p class="app-tagline">A Real-Time Messaging Platform</p>
+            </div>
+            <div class="login-body">
+                <form action="/login" method="post">
+                    <div class="form-group">
+                        <input type="text" id="username" name="username" class="form-input" placeholder="Username" required>
+                        <label for="username" class="form-label">Username<span>*</span></label>
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M20.5899 22C20.5899 18.13 16.7399 15 11.9999 15C7.25991 15 3.40991 18.13 3.40991 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Password" required>
+                        <label for="password" class="form-label">Password<span>*</span></label>
+                        <svg id="togglePassword" class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg" style="cursor: pointer;">
+                        <path d="M19 11H5C3.89543 11 3 11.8954 3 13V20C3 21.1046 3.89543 22 5 22H19C20.1046 22 21 21.1046 21 20V13C21 11.8954 20.1046 11 19 11Z"stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M7 11V7C7 4.23858 9.23858 2 12 2C14.7614 2 17 4.23858 17 7V11"stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <div class="extra-options">
+                        <!-- <div class="remember-container">
+                            <label class="custom-checkbox">
+                                <input type="checkbox">
+                                <span class="checkmark"></span>
+                            </label>
+                            <span class="remember-text">Remember me</span>
+                        </div> -->
+                        <a href="/forgot-password" class="forgot-link">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="login-btn">Sign In</button>
+                    <div class="signup-link">
+                        Don't have an account? <a href="/register">Create one</a>
+                    </div>
+                </form>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(function () {
+            let alerts = document.querySelectorAll(".alert");
+            alerts.forEach(alert => {
+                alert.style.transition = "opacity 0.5s ease";
+                alert.style.opacity = "0";
+                setTimeout(() => alert.remove(), 500); // Removes the alert completely after fading
+            });
+        }, 3000); // 3 seconds delay
+    });
+
+
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+
+    togglePassword.addEventListener('click', () => {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+    });
+    </script>
+</body>
+</html>
