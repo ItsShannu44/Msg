@@ -12,24 +12,45 @@ if (!SpeechRecognition) {
     const txtMessage = document.getElementById("TxtMessage");
     const startVoiceButton = document.getElementById("startVoice");
     let isListening = false; // Track the mic state
+    let previousText = ""; // Preserve already spoken text
 
     recognition.onstart = () => {
         console.log("Voice recognition started...");
         txtMessage.placeholder = "Listening...";
-        startVoiceButton.textContent = "Stop Voice"; // Update button text
-        voiceAnimation.classList.add("active"); // Show screen animation
+        startVoiceButton.textContent = "Stop Voice";
+
+        if (typeof voiceAnimation !== "undefined") {
+            voiceAnimation.classList.add("active");
+        }
+
+        previousText = txtMessage.value.trim(); // Store existing text
     };
 
     recognition.onerror = (event) => {
         console.error("Speech recognition error:", event.error);
+
+        // Gracefully stop mic on error
+        recognition.stop();
+        isListening = false;
+        startVoiceButton.textContent = "Start Voice";
+
+        if (typeof voiceAnimation !== "undefined") {
+            voiceAnimation.classList.remove("active");
+        }
+
+        txtMessage.placeholder = "Type a message...";
     };
 
     recognition.onresult = (event) => {
         let interimTranscript = "";
         let finalTranscript = "";
 
-        for (let i = 0; i < event.results.length; i++) {
-            let transcript = event.results[i][0].transcript;
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            let transcript = event.results[i][0].transcript.trim();
+
+            // Capitalize first letter of new sentence
+            transcript = transcript.charAt(0).toUpperCase() + transcript.slice(1);
+
             if (event.results[i].isFinal) {
                 finalTranscript += transcript + " ";
             } else {
@@ -37,22 +58,27 @@ if (!SpeechRecognition) {
             }
         }
 
-        txtMessage.value = finalTranscript || interimTranscript; // Show interim results live
+        txtMessage.value =
+            (previousText ? previousText + " " : "") +
+            (finalTranscript || interimTranscript);
     };
 
     recognition.onend = () => {
         console.log("Voice recognition stopped.");
         txtMessage.placeholder = "Type a message...";
         isListening = false;
-        startVoiceButton.textContent = "Start Voice"; // Reset button when recognition stops
-        voiceAnimation.classList.remove("active"); // Hide screen animation
+        startVoiceButton.textContent = "Start Voice";
+
+        if (typeof voiceAnimation !== "undefined") {
+            voiceAnimation.classList.remove("active");
+        }
     };
 
     startVoiceButton.addEventListener("click", () => {
         if (isListening) {
-            recognition.stop(); // Stop recognition if already running
+            recognition.stop();
         } else {
-            recognition.start(); // Start recognition
+            recognition.start();
             isListening = true;
         }
     });
@@ -494,3 +520,89 @@ document.addEventListener('DOMContentLoaded', function() {
         return '';
     }
 });
+
+
+
+///////////////////////SELECT MSG////////////////////
+/* ================= PREMIUM MESSAGE SELECTION ================= */
+
+let selectedMessages = new Set();
+let selectionMode = false;
+
+const toolbar = document.getElementById("selection-toolbar");
+const countEl = document.getElementById("selection-count");
+
+function updateToolbar() {
+    countEl.innerText = selectedMessages.size;
+
+    if (selectedMessages.size > 0) {
+        toolbar.classList.add("show");
+    } else {
+        toolbar.classList.remove("show");
+        selectionMode = false;
+    }
+}
+
+function toggleSelection(msg) {
+    selectionMode = true;
+
+    msg.classList.toggle("selected");
+
+    if (msg.classList.contains("selected")) {
+        selectedMessages.add(msg);
+    } else {
+        selectedMessages.delete(msg);
+    }
+
+    updateToolbar();
+}
+
+function clearSelection() {
+    selectedMessages.forEach(msg => msg.classList.remove("selected"));
+    selectedMessages.clear();
+    updateToolbar();
+}
+
+/* Desktop: Ctrl + Click */
+document.addEventListener("click", e => {
+    const msg = e.target.closest(".msg");
+    if (!msg) return;
+
+    if (e.ctrlKey) {
+        e.preventDefault();
+        toggleSelection(msg);
+    } else if (selectionMode) {
+        toggleSelection(msg);
+    }
+});
+
+/* Mobile: Long press */
+let pressTimer = null;
+
+document.addEventListener("touchstart", e => {
+    const msg = e.target.closest(".msg");
+    if (!msg) return;
+
+    pressTimer = setTimeout(() => {
+        toggleSelection(msg);
+    }, 450);
+});
+
+document.addEventListener("touchend", () => {
+    clearTimeout(pressTimer);
+});
+
+/* Copy */
+document.getElementById("copy-selected").addEventListener("click", () => {
+    let text = "";
+    selectedMessages.forEach(msg => {
+        const t = msg.querySelector(".msg-message")?.innerText;
+        if (t) text += t + "\n\n";
+    });
+
+    navigator.clipboard.writeText(text.trim());
+    clearSelection();
+});
+
+/* Cancel */
+document.getElementById("cancel-selection").addEventListener("click", clearSelection);
