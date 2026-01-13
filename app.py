@@ -91,13 +91,24 @@ def init_db():
         )
     ''')
 
-
+    # Deleted messages table (for soft delete)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS deleted_messages (
+            user_id INTEGER,
+            message_id INTEGER,
+            PRIMARY KEY (user_id, message_id),
+            FOREIGN KEY (message_id) REFERENCES messages(id) ON DELETE CASCADE
+        )
+    ''')
 
     # Add timestamp_utc column
     cursor.execute("PRAGMA table_info(messages)")
     columns = [column[1] for column in cursor.fetchall()]
     if "timestamp_utc" not in columns:
         cursor.execute("ALTER TABLE messages ADD COLUMN timestamp_utc TEXT")
+
+    conn.commit()
+    conn.close()
 
 class User(UserMixin):
     def __init__(self, id, username, password):
@@ -150,12 +161,12 @@ def register():
         
         # Insert user (keeping plaintext password)
         cursor.execute('INSERT INTO users (username, password, profile_picture, email) VALUES (?, ?, ?, ?)', 
-                      (username, password, profile_picture_data, email))
+                    (username, password, profile_picture_data, email))
         user_id = cursor.lastrowid
         
         # Create agreement record
         cursor.execute('INSERT INTO user_agreements (user_id, accepted) VALUES (?, ?)', 
-                      (user_id, False))
+                    (user_id, False))
         
         conn.commit()
         flash('Registration successful! Please login.', 'success')
@@ -398,11 +409,11 @@ def index():
 
     # Modified return statement to include show_agreement
     return render_template('index.html', 
-                         users=users, 
-                         recent_chats=recent_chats, 
-                         last_chat_user_id=last_chat_user_id,
-                         get_username=get_username,
-                         show_agreement=show_agreement)  # NEW PARAMETER
+                        users=users, 
+                        recent_chats=recent_chats, 
+                        last_chat_user_id=last_chat_user_id,
+                        get_username=get_username,
+                        show_agreement=show_agreement)  # NEW PARAMETER
 
 
 @app.route('/get_recent_chats', methods=['GET'])
@@ -483,6 +494,58 @@ def handle_chat_cleared(data):
     emit('chat_cleared', data, room=data['recipient_id'])
     emit('chat_cleared', data, room=data['sender_id'])
 
+# Delete message socket event
+@socketio.on('delete_message_request')
+def handle_delete_message(data):
+    """Handle message deletion requests via socket"""
+    try:
+        message_id = data.get('message_id')
+        delete_for_everyone = data.get('delete_for_everyone', False)
+        user_id = data.get('user_id')
+        
+        conn = sqlite3.connect('chat.db')
+        cursor = conn.cursor()
+        
+        # Get message details
+        cursor.execute('SELECT sender_id, recipient_id FROM messages WHERE id = ?', (message_id,))
+        message = cursor.fetchone()
+        
+        if message:
+            sender_id, recipient_id = message
+            
+            if delete_for_everyone:
+                # Delete from database
+                cursor.execute('DELETE FROM messages WHERE id = ?', (message_id,))
+                cursor.execute('DELETE FROM message_backup WHERE id = ?', (message_id,))
+                
+                # Notify both users
+                emit('message_deleted_for_everyone', {
+                    'message_id': message_id
+                }, room=str(sender_id))
+                
+                if sender_id != recipient_id:
+                    emit('message_deleted_for_everyone', {
+                        'message_id': message_id
+                    }, room=str(recipient_id))
+            else:
+                # Soft delete for current user only
+                cursor.execute('''
+                    INSERT OR IGNORE INTO deleted_messages (user_id, message_id)
+                    VALUES (?, ?)
+                ''', (user_id, message_id))
+                
+                # Notify only the requesting user
+                emit('message_deleted_for_me', {
+                    'message_id': message_id
+                }, room=str(user_id))
+            
+            conn.commit()
+        
+        conn.close()
+        
+    except Exception as e:
+        print(f"Error in handle_delete_message: {e}")
+
 
 
 @socketio.on('send_message')
@@ -496,7 +559,7 @@ def handle_send_message(data):
     # Save the message to the database
     cursor.execute(
         '''INSERT INTO messages (sender_id, recipient_id, message, timestamp_utc)
-           VALUES (?, ?, ?, ?)''',
+        VALUES (?, ?, ?, ?)''',
         (data['sender_id'], data['recipient_id'], data['message'],timestamp)
     )
 
@@ -517,19 +580,36 @@ def handle_send_message(data):
 def get_messages(recipient_id):
     conn = sqlite3.connect('chat.db')
     cursor = conn.cursor()
+    
+    # Get messages with IDs, excluding those the user has deleted
     cursor.execute('''
-        SELECT u.username, m.message, m.timestamp_utc
+        SELECT m.id, u.username, m.message, m.timestamp_utc, m.sender_id
         FROM messages m
         JOIN users u ON m.sender_id = u.id
-        WHERE (m.sender_id = ? AND m.recipient_id = ?)
-        OR (m.sender_id = ? AND m.recipient_id = ?)
+        LEFT JOIN deleted_messages dm ON m.id = dm.message_id AND dm.user_id = ?
+        WHERE ((m.sender_id = ? AND m.recipient_id = ?)
+        OR (m.sender_id = ? AND m.recipient_id = ?))
+        AND dm.message_id IS NULL
         ORDER BY m.timestamp_utc
-    ''', (current_user.id, recipient_id, recipient_id, current_user.id))
+    ''', (current_user.id, current_user.id, recipient_id, recipient_id, current_user.id))
+    
     messages = cursor.fetchall()
     conn.close()
 
-    formatted_messages = [(msg[0], msg[1], msg[2]) for msg in messages]
+    formatted_messages = []
+    for msg in messages:
+        msg_id, username, message_text, timestamp, sender_id = msg
+        is_sender = sender_id == current_user.id
+        formatted_messages.append({
+            'id': msg_id,  # Make sure this is included
+            'sender': username,
+            'message': message_text,
+            'timestamp': timestamp,
+            'is_sender': is_sender
+        })
+    
     return jsonify(formatted_messages)
+
 
 
 def send_message(recipient_id, message):
@@ -892,7 +972,86 @@ def check_agreement_status():
     finally:
         conn.close()
 
+#==============================================================================
+# DELETE MESSAGE ROUTE
+#==============================================================================
+@app.route('/delete_message', methods=['POST'])
+@login_required
+def delete_message():
+    data = request.get_json()
+    message_id = data.get('message_id')
+    delete_for_everyone = data.get('delete_for_everyone', False)
+    
+    conn = sqlite3.connect('chat.db')
+    cursor = conn.cursor()
+    
+    try:
+        # First get message details
+        cursor.execute('''
+            SELECT id, sender_id, recipient_id, message 
+            FROM messages WHERE id = ?
+        ''', (message_id,))
+        message = cursor.fetchone()
+        
+        if not message:
+            return jsonify({'success': False, 'error': 'Message not found'}), 404
+        
+        msg_id, sender_id, recipient_id, message_text = message
+        
+        # Check permissions - only sender can delete for everyone
+        if delete_for_everyone and sender_id != current_user.id:
+            return jsonify({
+                'success': False, 
+                'error': 'You can only delete your own messages for everyone'
+            }), 403
+        
+        if delete_for_everyone:
+            # Delete for everyone - remove from database completely
+            cursor.execute('DELETE FROM messages WHERE id = ?', (message_id,))
+            
+            # Also delete from backup
+            cursor.execute('DELETE FROM message_backup WHERE id = ?', (message_id,))
+            
+            # Also remove from deleted_messages table
+            cursor.execute('DELETE FROM deleted_messages WHERE message_id = ?', (message_id,))
+            
+            # Emit socket event to notify both users
+            socketio.emit('message_deleted_for_everyone', {
+                'message_id': message_id,
+                'deleted_by': current_user.id
+            }, room=str(sender_id))
+            
+            if sender_id != recipient_id:
+                socketio.emit('message_deleted_for_everyone', {
+                    'message_id': message_id,
+                    'deleted_by': current_user.id
+                }, room=str(recipient_id))
+                
+        else:
+            # Delete for me only - soft delete
+            # Mark message as deleted for current user
+            cursor.execute('''
+                INSERT OR IGNORE INTO deleted_messages (user_id, message_id)
+                VALUES (?, ?)
+            ''', (current_user.id, message_id))
+            
+            # Emit socket event only to current user
+            socketio.emit('message_deleted_for_me', {
+                'message_id': message_id,
+                'deleted_by': current_user.id
+            }, room=str(current_user.id))
+        
+        conn.commit()
+        return jsonify({'success': True})
+        
+    except sqlite3.Error as e:
+        conn.rollback()
+        print(f"Database error: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    finally:
+        conn.close()
+
+    
 if __name__ == '__main__':
     init_db()
     socketio.run(app, debug=True, port=3000)
-
