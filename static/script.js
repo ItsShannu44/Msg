@@ -231,6 +231,32 @@ socket.on('messages_deleted', function(data) {
 });
 
 
+// Socket event handlers for message deletion
+socket.on('message_deleted_for_me', function(data) {
+    const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+    if (messageElement) {
+        messageElement.style.opacity = '0.3';
+        messageElement.style.textDecoration = 'line-through';
+    }
+});
+
+socket.on('message_deleted_for_everyone', function(data) {
+    const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+    if (messageElement) {
+        messageElement.style.opacity = '0';
+        messageElement.style.height = '0';
+        messageElement.style.padding = '0';
+        messageElement.style.margin = '0';
+        messageElement.style.overflow = 'hidden';
+        
+        setTimeout(() => {
+            if (messageElement.parentNode) {
+                messageElement.parentNode.removeChild(messageElement);
+            }
+        }, 300);
+    }
+});
+
 ///////////////////////Add Button Toggle/////////////////
 
 ////////////////////////////SELECTED ACTIVE USER BG//////
@@ -606,3 +632,441 @@ document.getElementById("copy-selected").addEventListener("click", () => {
 
 /* Cancel */
 document.getElementById("cancel-selection").addEventListener("click", clearSelection);
+
+
+
+
+
+
+
+
+// ================= MESSAGE DELETION FUNCTIONALITY =================
+
+// Global variables for message deletion
+let selectedMessageElement = null;
+let selectedMessageId = null;
+let deleteMode = 'forMe'; // 'forMe' or 'forEveryone'
+
+// Show message context menu on right-click or long press
+function showMessageContextMenu(event, messageElement) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    console.log('Show context menu called');
+    
+    // Get the message element
+    selectedMessageElement = messageElement;
+    if (!selectedMessageElement) {
+        console.error('No message element found');
+        return;
+    }
+    
+    // Get message ID from data attribute
+    selectedMessageId = selectedMessageElement.getAttribute('data-message-id');
+    console.log('Message ID:', selectedMessageId);
+    
+    if (!selectedMessageId) {
+        console.error('No message ID found in data attribute');
+        // Try to find message ID in child elements
+        const msgIdElement = selectedMessageElement.querySelector('[data-message-id]');
+        if (msgIdElement) {
+            selectedMessageId = msgIdElement.getAttribute('data-message-id');
+            console.log('Found message ID in child:', selectedMessageId);
+        }
+    }
+    
+    if (!selectedMessageId) {
+        showToast('Cannot delete: Message ID not found');
+        return;
+    }
+    
+    // Check if this is a sender message (user's own message)
+    const isSenderMessage = selectedMessageElement.classList.contains('sender');
+    console.log('Is sender message:', isSenderMessage);
+    
+    // Show/hide "Delete for everyone" option based on sender
+    const deleteForEveryoneBtn = document.getElementById('deleteForEveryoneBtn');
+    if (deleteForEveryoneBtn) {
+        if (isSenderMessage) {
+            deleteForEveryoneBtn.style.display = 'block';
+        } else {
+            deleteForEveryoneBtn.style.display = 'none';
+        }
+    }
+    
+    // Position the context menu
+    const contextMenu = document.getElementById('messageContextMenu');
+    if (!contextMenu) {
+        console.error('Context menu element not found');
+        return;
+    }
+    
+    contextMenu.style.display = 'block';
+    
+    // Position at cursor
+    let clientX, clientY;
+    if (event.type === 'touchstart' && event.touches && event.touches[0]) {
+        clientX = event.touches[0].clientX;
+        clientY = event.touches[0].clientY;
+    } else {
+        clientX = event.clientX;
+        clientY = event.clientY;
+    }
+    
+    const x = Math.min(clientX || 0, window.innerWidth - contextMenu.offsetWidth - 10);
+    const y = Math.min(clientY || 0, window.innerHeight - contextMenu.offsetHeight - 10);
+    
+    contextMenu.style.left = x + 'px';
+    contextMenu.style.top = y + 'px';
+    
+    // Prevent clicks outside from closing immediately
+    setTimeout(() => {
+        document.addEventListener('click', closeContextMenuOnClick);
+    }, 10);
+}
+
+// Close context menu when clicking outside
+function closeContextMenuOnClick(event) {
+    const contextMenu = document.getElementById('messageContextMenu');
+    if (contextMenu && !contextMenu.contains(event.target) && 
+        !event.target.closest('.msg')) {
+        hideMessageContextMenu();
+        document.removeEventListener('click', closeContextMenuOnClick);
+    }
+}
+
+// Hide context menu
+function hideMessageContextMenu() {
+    const contextMenu = document.getElementById('messageContextMenu');
+    if (contextMenu) {
+        contextMenu.style.display = 'none';
+    }
+    selectedMessageElement = null;
+    selectedMessageId = null;
+}
+
+// Delete message for me only
+function deleteMessageForMe() {
+    console.log('Delete for me called, Message ID:', selectedMessageId);
+    
+    if (!selectedMessageElement || !selectedMessageId) {
+        showToast('No message selected');
+        hideMessageContextMenu();
+        return;
+    }
+    
+    deleteMode = 'forMe';
+    showDeleteModal('Delete for me', 
+                   'Are you sure you want to delete this message for yourself? The other person will still see it.',
+                   false);
+}
+
+// Delete message for everyone
+function deleteMessageForEveryone() {
+    console.log('Delete for everyone called, Message ID:', selectedMessageId);
+    
+    if (!selectedMessageElement || !selectedMessageId) {
+        showToast('No message selected');
+        hideMessageContextMenu();
+        return;
+    }
+    
+    // Only allow delete for everyone for sender's own messages
+    if (!selectedMessageElement.classList.contains('sender')) {
+        showToast('You can only delete your own messages for everyone');
+        hideMessageContextMenu();
+        return;
+    }
+    
+    deleteMode = 'forEveryone';
+    showDeleteModal('Delete for everyone', 
+                   'Are you sure you want to delete this message for everyone? This action cannot be undone.',
+                   true);
+}
+
+// Copy message text
+function copyMessage() {
+    if (!selectedMessageElement) return;
+    
+    const messageText = selectedMessageElement.querySelector('.msg-message')?.textContent;
+    if (messageText) {
+        navigator.clipboard.writeText(messageText.trim())
+            .then(() => showToast('Message copied to clipboard'))
+            .catch(() => showToast('Failed to copy message'));
+    }
+    
+    hideMessageContextMenu();
+}
+
+// Show delete confirmation modal
+function showDeleteModal(title, message, isForEveryone) {
+    const modal = document.getElementById('deleteModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const confirmBtn = document.getElementById('confirmBtn');
+    
+    if (!modal || !modalTitle || !modalMessage || !confirmBtn) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    
+    if (isForEveryone) {
+        confirmBtn.className = 'modal-btn confirm-btn danger';
+        confirmBtn.textContent = 'Delete for Everyone';
+    } else {
+        confirmBtn.className = 'modal-btn confirm-btn';
+        confirmBtn.textContent = 'Delete for Me';
+    }
+    
+    modal.style.display = 'flex';
+    
+    // Remove click listener to prevent multiple bindings
+    document.removeEventListener('click', closeContextMenuOnClick);
+}
+
+// Hide modal
+function hideModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    selectedMessageElement = null;
+    selectedMessageId = null;
+}
+
+// Confirm delete action
+async function confirmDelete() {
+    console.log('Confirm delete called, Message ID:', selectedMessageId, 'Mode:', deleteMode);
+    
+    hideModal();
+    
+    if (!selectedMessageId) {
+        showToast('No message selected');
+        return;
+    }
+    
+    const isForEveryone = deleteMode === 'forEveryone';
+    
+    try {
+        const response = await fetch('/delete_message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message_id: selectedMessageId,
+                delete_for_everyone: isForEveryone
+            })
+        });
+        
+        const data = await response.json();
+        console.log('Delete response:', data);
+        
+        if (data.success) {
+            // Handle UI update based on delete mode
+            if (isForEveryone) {
+                // Remove message completely
+                if (selectedMessageElement) {
+                    selectedMessageElement.classList.add('deleted-for-all');
+                    setTimeout(() => {
+                        if (selectedMessageElement && selectedMessageElement.parentNode) {
+                            selectedMessageElement.parentNode.removeChild(selectedMessageElement);
+                        }
+                    }, 300);
+                }
+                showToast('Message deleted for everyone');
+            } else {
+                // Just hide message for current user (soft delete)
+                if (selectedMessageElement) {
+                    selectedMessageElement.classList.add('deleted');
+                }
+                showToast('Message deleted for you');
+            }
+        } else {
+            showToast('Failed to delete message: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error deleting message:', error);
+        showToast('Error deleting message. Please try again.');
+    }
+    
+    selectedMessageElement = null;
+    selectedMessageId = null;
+}
+
+// Toast notification function
+function showToast(message) {
+    const toast = document.getElementById('toast');
+    if (!toast) {
+        console.error('Toast element not found');
+        return;
+    }
+    
+    toast.textContent = message;
+    toast.style.opacity = '1';
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        toast.style.opacity = '0';
+    }, 3000);
+}
+
+// Initialize message context menu
+function initMessageContextMenu() {
+    console.log('Initializing message context menu...');
+    
+    // Right-click context menu for desktop
+    document.addEventListener('contextmenu', function(event) {
+        const messageElement = event.target.closest('.msg');
+        if (messageElement) {
+            showMessageContextMenu(event, messageElement);
+            return false; // Prevent default context menu
+        }
+    });
+    
+    // Mobile: Long press on messages
+    let pressTimer;
+    document.addEventListener('touchstart', function(event) {
+        const messageElement = event.target.closest('.msg');
+        if (messageElement) {
+            pressTimer = setTimeout(() => {
+                showMessageContextMenu(event, messageElement);
+            }, 500); // 500ms long press
+        }
+    });
+    
+    document.addEventListener('touchend', function() {
+        clearTimeout(pressTimer);
+    });
+    
+    document.addEventListener('touchmove', function() {
+        clearTimeout(pressTimer);
+    });
+    
+    // Close context menu on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            hideMessageContextMenu();
+            hideModal();
+        }
+    });
+    
+    // Close modal when clicking outside
+    document.addEventListener('click', function(event) {
+        const modal = document.getElementById('deleteModal');
+        if (modal && modal.style.display === 'flex' && 
+            !modal.contains(event.target) && 
+            !event.target.closest('.message-context-menu')) {
+            hideModal();
+        }
+    });
+    
+    console.log('Message context menu initialized');
+}
+
+// Update the addMessageToConversation function to include message IDs
+function addMessageToConversation(sender, message, isSender, timestamp, senderProfilePic, receiverProfilePic, status = "sent", messageId = null) {
+    const conversationArea = document.getElementById('conversation-area');
+    const formattedTimestamp = formatTimestamp(timestamp);
+    
+    // Create message container
+    const msgDiv = document.createElement('div');
+    msgDiv.className = isSender ? 'msg sender' : 'msg receiver';
+    
+    // Add message ID as data attribute (CRITICAL FIX)
+    if (messageId) {
+        msgDiv.setAttribute('data-message-id', messageId);
+    }
+    
+    const messageDate = new Date(timestamp).toDateString();
+    let lastDate = localStorage.getItem('lastMessageDate') || '';
+
+    // Add date separator if it's a new day
+    if (messageDate !== lastDate) {
+        lastDate = messageDate;
+        localStorage.setItem('lastMessageDate', messageDate);
+        const dateDiv = document.createElement("div");
+        dateDiv.className = "msg-date";
+        dateDiv.textContent = messageDate;
+        conversationArea.appendChild(dateDiv);
+    }
+
+    let profilePicUrl = isSender 
+        ? `/profile_picture/${currentUserId}`
+        : receiverProfilePic || `/profile_picture/${currentRecipientId}` || "/static/default_profile.jpg";
+
+    msgDiv.innerHTML = `
+        <div class="msg-detail">
+            <div class="msg-content">
+                <span class="msg-message">${message}</span>
+                <span class="msg-time">${formattedTimestamp}</span>
+            </div>
+            <img class="msg-profile-pic" src="${profilePicUrl}" alt="${sender}'s Profile">
+        </div>
+    `;
+
+    conversationArea.appendChild(msgDiv);
+
+    // Add click event for selection (if needed)
+    msgDiv.addEventListener('click', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+            this.classList.toggle('selected');
+        }
+    });
+
+    // Ensure scrolling happens after the new message is added
+    setTimeout(() => {
+        conversationArea.scrollTop = conversationArea.scrollHeight;
+    }, 100);
+    
+    return msgDiv;
+}
+
+
+
+// Socket event handlers for message deletion
+socket.on('message_deleted_for_me', function(data) {
+    console.log('Socket: message_deleted_for_me', data);
+    const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+    if (messageElement) {
+        messageElement.classList.add('deleted');
+        showToast('A message was deleted');
+    }
+});
+
+socket.on('message_deleted_for_everyone', function(data) {
+    console.log('Socket: message_deleted_for_everyone', data);
+    const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+    if (messageElement) {
+        messageElement.classList.add('deleted-for-all');
+        setTimeout(() => {
+            if (messageElement && messageElement.parentNode) {
+                messageElement.parentNode.removeChild(messageElement);
+            }
+        }, 300);
+        showToast('A message was deleted for everyone');
+    }
+});
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing message deletion...');
+    initMessageContextMenu();
+    
+    // Test: Add some debug messages
+    console.log('Current user ID:', currentUserId);
+    console.log('Current recipient ID:', currentRecipientId);
+});
+
+// Debug function to check message IDs in DOM
+function debugMessageIds() {
+    const messages = document.querySelectorAll('.msg');
+    console.log('Total messages in DOM:', messages.length);
+    messages.forEach((msg, index) => {
+        const msgId = msg.getAttribute('data-message-id');
+        console.log(`Message ${index}: ID = ${msgId}, Class = ${msg.className}`);
+    });
+}
