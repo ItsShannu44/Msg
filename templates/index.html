@@ -267,14 +267,22 @@ function formatTimestamp(utcString) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
 }
 let lastDate = '';
-function addMessageToConversation(sender, message, isSender, timestamp, senderProfilePic, receiverProfilePic, status = "sent") {
+// Update the addMessageToConversation function
+function addMessageToConversation(sender, message, isSender, timestamp, senderProfilePic, receiverProfilePic, messageId = null, canDeleteForEveryone = false, isDeleted = false) {
     const conversationArea = document.getElementById('conversation-area');
     const formattedTimestamp = formatTimestamp(timestamp);
     const msgDiv = document.createElement('div');
-    msgDiv.className = isSender ? 'msg sender' : 'msg receiver'; // Sender or receiver class
-    const messageDate = new Date(timestamp).toDateString(); // Get only the date part
-
-    // Add date separator if it's a new day
+    msgDiv.className = isSender ? 'msg sender' : 'msg receiver';
+    
+    if (isDeleted) {
+        msgDiv.classList.add('deleted');
+        message = '[Deleted]';
+    }
+    
+    msgDiv.dataset.messageId = messageId;
+    
+    const messageDate = new Date(timestamp).toDateString();
+    
     if (messageDate !== lastDate) {
         lastDate = messageDate;
         const dateDiv = document.createElement("div");
@@ -284,8 +292,8 @@ function addMessageToConversation(sender, message, isSender, timestamp, senderPr
     }
 
     let profilePicUrl = isSender 
-    ? `/profile_picture/${currentUserId}`  // Sender's profile
-    : receiverProfilePic || `/profile_picture/${currentRecipientId}` || "/default_profile.png";  // Receiver's profile
+    ? `/profile_picture/${currentUserId}`
+    : receiverProfilePic || `/profile_picture/${currentRecipientId}` || "/default_profile.png";
 
     msgDiv.innerHTML = `
         <div class="msg-detail">
@@ -296,14 +304,67 @@ function addMessageToConversation(sender, message, isSender, timestamp, senderPr
             <img class="msg-profile-pic" src="${profilePicUrl}" alt="${sender}'s Profile">
         </div>
     `;
+    
+    // Add delete button for sender's messages that aren't deleted for everyone
+    if (isSender && messageId && !isDeleted) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'msg-delete-btn';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.title = 'Delete message';
+        
+        const dropdown = document.createElement('div');
+        dropdown.className = 'delete-dropdown';
+        dropdown.innerHTML = `
+            <div class="delete-option delete-for-me" onclick="deleteMessage(${messageId}, 'for_me')">
+                Delete for me
+            </div>
+            <div class="delete-option delete-for-everyone" onclick="deleteMessage(${messageId}, 'for_everyone')">
+                Delete for everyone
+            </div>
+        `;
+        
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.delete-dropdown').forEach(d => d.classList.remove('show'));
+            dropdown.classList.toggle('show');
+        };
+        
+        msgDiv.appendChild(deleteBtn);
+        msgDiv.appendChild(dropdown);
+    }
+    
+    // Add delete button for receiver's messages (only delete for me)
+    if (!isSender && messageId && !isDeleted) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'msg-delete-btn';
+        deleteBtn.innerHTML = '×';
+        deleteBtn.title = 'Delete for me';
+        
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (confirm('Delete this message for you?')) {
+                deleteMessage(messageId, 'for_me');
+            }
+        };
+        
+        msgDiv.appendChild(deleteBtn);
+    }
 
     conversationArea.appendChild(msgDiv);
 
-    // Ensure scrolling happens after the new message is added
     setTimeout(() => {
         conversationArea.scrollTop = conversationArea.scrollHeight;
     }, 100);
+    
+    // Close dropdown when clicking elsewhere
+    document.addEventListener('click', (e) => {
+        if (!msgDiv.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
 }
+
+
 
 socket.on("status_updated", (data) => {
     updateMessageStatus(data.index, data.status);
@@ -327,10 +388,13 @@ socket.on('receive_message', (data) => {
         addMessageToConversation(
             data.sender_id === currentUserId ? 'You' : data.sender_username, 
             data.message, 
-            false,  // Receiver side
+            false,
             data.timestamp,
-            data.sender_profile_picture, // Ensure this value is correctly passed
-            `/profile_picture/${data.sender_id}` // Correctly assign sender's profile picture
+            data.sender_profile_picture,
+            `/profile_picture/${data.sender_id}`,
+            data.message_id,
+            data.sender_id === currentUserId,
+            false
         );
         fetchRecentChats();
     }
@@ -494,22 +558,96 @@ socket.on('connect', () => {
     console.log("Connected to socket.io server"); // Debugging
 });
 
+// Update fetchMessages function
 async function fetchMessages(recipientId) {
-console.log("fetch");
-const response = await fetch(`/get_messages/${recipientId}`);
-console.log(" resp",response);
-const messages = await response.json();
-const conversationArea = document.getElementById('conversation-area');
-conversationArea.innerHTML = ''; // Clear previous messages
-console.log(messages);
-messages.forEach(msg => {
-    const isSender = msg[0] === '{{ current_user.username }}'; // Check if the message is from the current user
-    addMessageToConversation(msg[0], msg[1], isSender, msg[2]); // msg[2] should be the timestamp
-});
-socket.emit("update_status", { index: messages.length - 1, status: "read" });
-conversationArea.scrollTop = conversationArea.scrollHeight; // Scroll to the bottom
+    console.log("fetch");
+    const response = await fetch(`/get_messages/${recipientId}`);
+    const messages = await response.json();
+    const conversationArea = document.getElementById('conversation-area');
+    conversationArea.innerHTML = '';
+    console.log(messages);
+    
+    messages.forEach(msg => {
+        const isSender = msg.sender_id === currentUserId;
+        addMessageToConversation(
+            msg.username, 
+            msg.display_message, 
+            isSender, 
+            msg.timestamp, 
+            null, 
+            null,
+            msg.message_id,
+            msg.can_delete_for_everyone,
+            msg.is_deleted
+        );
+    });
+    
+    socket.emit("update_status", { index: messages.length - 1, status: "read" });
+    conversationArea.scrollTop = conversationArea.scrollHeight;
 }
 
+// Add deleteMessage function
+async function deleteMessage(messageId, deleteType) {
+    try {
+        const response = await fetch('/delete_message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message_id: messageId,
+                delete_type: deleteType
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Close any open dropdowns
+            document.querySelectorAll('.delete-dropdown').forEach(d => d.classList.remove('show'));
+            
+            // If deleting for everyone, wait for socket event
+            // If deleting for me, update immediately
+            if (deleteType === 'for_me') {
+                const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                if (msgElement) {
+                    msgElement.classList.add('deleted');
+                    const msgContent = msgElement.querySelector('.msg-message');
+                    if (msgContent) {
+                        msgContent.textContent = currentUserId === parseInt(msgElement.dataset.senderId) 
+                            ? '[You deleted this message]' 
+                            : '[Message deleted]';
+                    }
+                }
+            }
+        } else {
+            alert(result.error || 'Failed to delete message');
+        }
+    } catch (error) {
+        console.error('Error deleting message:', error);
+        alert('Error deleting message');
+    }
+}
+
+// Listen for deletion events from socket
+socket.on('message_deleted', function(data) {
+    const msgElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+    
+    if (msgElement) {
+        if (data.delete_type === 'for_everyone') {
+            msgElement.classList.add('deleted');
+            const msgContent = msgElement.querySelector('.msg-message');
+            if (msgContent) {
+                msgContent.textContent = '[This message was deleted]';
+            }
+            // Hide delete button
+            const deleteBtn = msgElement.querySelector('.msg-delete-btn');
+            if (deleteBtn) deleteBtn.style.display = 'none';
+        } else if (data.delete_type === 'for_me' && data.deleted_by !== currentUserId) {
+            // Someone else deleted their copy, no action needed for us
+        }
+    }
+});
     
 let firstLoad = true; // Flag to track initial page load
 
@@ -753,6 +891,19 @@ async function fetchCurrentUser() {
         console.error('Failed to fetch current user:', error);
     }
 }
+
+
+
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.msg-delete-btn') && !e.target.closest('.delete-dropdown')) {
+        document.querySelectorAll('.delete-dropdown').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+    }
+});
+
 
 // Call this function on page load
 window.onload = fetchCurrentUser;
