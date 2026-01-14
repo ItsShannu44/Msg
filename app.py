@@ -91,20 +91,6 @@ def init_db():
         )
     ''')
 
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        sender_id INTEGER,
-        recipient_id INTEGER,
-        message TEXT,
-        timestamp_utc TEXT,
-        deleted_for_sender BOOLEAN DEFAULT 0,
-        deleted_for_recipient BOOLEAN DEFAULT 0,
-        deleted_for_everyone BOOLEAN DEFAULT 0
-    )
-''')
-
-
     # Add timestamp_utc column
     cursor.execute("PRAGMA table_info(messages)")
     columns = [column[1] for column in cursor.fetchall()]
