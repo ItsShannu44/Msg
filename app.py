@@ -544,6 +544,10 @@ def handle_send_message(data):
         'timestamp': timestamp
     }, room=data['sender_id'])
 
+@socketio.on('message_deleted')
+def handle_message_deleted(data):
+    """Forward deletion events to relevant users"""
+    emit('message_deleted', data, room=data.get('room', ''))
 
 
 @app.route('/get_messages/<int:recipient_id>', methods=['GET'])
