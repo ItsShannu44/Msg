@@ -91,6 +91,18 @@ def init_db():
         )
     ''')
 
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        sender_id INTEGER,
+        recipient_id INTEGER,
+        message TEXT,
+        timestamp_utc TEXT,
+        deleted_for_sender BOOLEAN DEFAULT 0,
+        deleted_for_recipient BOOLEAN DEFAULT 0,
+        deleted_for_everyone BOOLEAN DEFAULT 0
+    )
+''')
 
 
     # Add timestamp_utc column
@@ -889,6 +901,85 @@ def check_agreement_status():
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         return jsonify({'accepted': True})  # Default to accepted to avoid infinite loop
+    finally:
+        conn.close()
+
+#-------------------------ENDPOINT FOR DELETE FEATURE------------------
+@app.route('/delete_message', methods=['POST'])
+@login_required
+def delete_message():
+    data = request.json
+    message_id = data.get('message_id')
+    delete_type = data.get('delete_type')  # 'for_me' or 'for_everyone'
+    
+    # Fetch the message
+    conn = sqlite3.connect('chat.db')
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute('SELECT sender_id, recipient_id FROM messages WHERE id = ?', (message_id,))
+        message = cursor.fetchone()
+
+        if not message:
+            return jsonify({'success': False, 'error': 'Message not found'})
+
+        sender_id, recipient_id = message
+
+        # Check permissions based on delete type
+        if delete_type == 'for_everyone':
+            # Only sender can delete for everyone
+            if current_user.id != sender_id:
+                return jsonify({
+                    'success': False, 
+                    'error': 'Only sender can delete for everyone'
+                })
+            
+            # Mark as deleted for everyone in database
+            cursor.execute('UPDATE messages SET deleted_for_everyone = 1 WHERE id = ?', (message_id,))
+            
+            # Also mark as deleted for sender to avoid confusion
+            cursor.execute('UPDATE messages SET deleted_for_sender = 1 WHERE id = ?', (message_id,))
+            
+            # Emit to both users
+            socketio.emit('message_deleted', {
+                'message_id': message_id, 
+                'delete_type': 'for_everyone'
+            }, room=str(sender_id))
+            
+            socketio.emit('message_deleted', {
+                'message_id': message_id, 
+                'delete_type': 'for_everyone'
+            }, room=str(recipient_id))
+            
+        elif delete_type == 'for_me':
+            # Check if user is either sender or recipient
+            if current_user.id not in [sender_id, recipient_id]:
+                return jsonify({
+                    'success': False, 
+                    'error': 'You are not allowed to delete this message'
+                })
+            
+            # Mark as deleted for this user only
+            if current_user.id == sender_id:
+                cursor.execute('UPDATE messages SET deleted_for_sender = 1 WHERE id = ?', (message_id,))
+            else:  # user is recipient
+                cursor.execute('UPDATE messages SET deleted_for_recipient = 1 WHERE id = ?', (message_id,))
+            
+            # Emit only to the user who deleted
+            socketio.emit('message_deleted', {
+                'message_id': message_id, 
+                'delete_type': 'for_me'
+            }, room=str(current_user.id))
+            
+        else:
+            return jsonify({'success': False, 'error': 'Invalid delete type'})
+
+        conn.commit()
+        return jsonify({'success': True})
+        
+    except sqlite3.Error as e:
+        conn.rollback()
+        return jsonify({'success': False, 'error': str(e)})
     finally:
         conn.close()
 
