@@ -539,18 +539,60 @@ def handle_send_message(data):
 def get_messages(recipient_id):
     conn = sqlite3.connect('chat.db')
     cursor = conn.cursor()
+    
     cursor.execute('''
-        SELECT u.username, m.message, m.timestamp_utc
+        SELECT 
+            u.username, 
+            m.message, 
+            m.timestamp_utc,
+            m.id as message_id,
+            m.sender_id,
+            m.deleted_for_sender,
+            m.deleted_for_recipient,
+            m.deleted_for_everyone,
+            CASE 
+                WHEN m.deleted_for_everyone = 1 THEN '[This message was deleted]'
+                WHEN m.deleted_for_sender = 1 AND ? = m.sender_id THEN '[You deleted this message]'
+                WHEN m.deleted_for_recipient = 1 AND ? = m.recipient_id THEN '[Message deleted]'
+                ELSE m.message
+            END as display_message
         FROM messages m
         JOIN users u ON m.sender_id = u.id
-        WHERE (m.sender_id = ? AND m.recipient_id = ?)
-        OR (m.sender_id = ? AND m.recipient_id = ?)
+        WHERE ((m.sender_id = ? AND m.recipient_id = ?)
+            OR (m.sender_id = ? AND m.recipient_id = ?))
         ORDER BY m.timestamp_utc
-    ''', (current_user.id, recipient_id, recipient_id, current_user.id))
+    ''', (current_user.id, current_user.id, 
+          current_user.id, recipient_id, recipient_id, current_user.id))
+    
     messages = cursor.fetchall()
     conn.close()
 
-    formatted_messages = [(msg[0], msg[1], msg[2]) for msg in messages]
+    formatted_messages = []
+    for msg in messages:
+        sender_id = msg[4]
+        is_sender = sender_id == current_user.id
+        
+        # Check if message should be shown
+        if msg[7]:  # deleted_for_everyone
+            show_message = False
+        elif is_sender and msg[5]:  # deleted_for_sender
+            show_message = False
+        elif not is_sender and msg[6]:  # deleted_for_recipient
+            show_message = False
+        else:
+            show_message = True
+        
+        formatted_messages.append({
+            'username': msg[0],
+            'message': msg[1],
+            'timestamp': msg[2],
+            'message_id': msg[3],
+            'sender_id': sender_id,
+            'display_message': msg[8] if not show_message else msg[1],
+            'is_deleted': not show_message,
+            'can_delete_for_everyone': is_sender and not msg[7]  # sender and not already deleted for everyone
+        })
+    
     return jsonify(formatted_messages)
 
 
