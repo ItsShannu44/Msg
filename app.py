@@ -110,6 +110,16 @@ def init_db():
     columns = [column[1] for column in cursor.fetchall()]
     if "timestamp_utc" not in columns:
         cursor.execute("ALTER TABLE messages ADD COLUMN timestamp_utc TEXT")
+    
+    cursor.execute("PRAGMA table_info(messages)")
+    columns = [column[1] for column in cursor.fetchall()]
+
+    if "deleted_for_sender" not in columns:
+        cursor.execute("ALTER TABLE messages ADD COLUMN deleted_for_sender BOOLEAN DEFAULT 0")
+    if "deleted_for_recipient" not in columns:
+        cursor.execute("ALTER TABLE messages ADD COLUMN deleted_for_recipient BOOLEAN DEFAULT 0")
+    if "deleted_for_everyone" not in columns:
+        cursor.execute("ALTER TABLE messages ADD COLUMN deleted_for_everyone BOOLEAN DEFAULT 0")
 
 class User(UserMixin):
     def __init__(self, id, username, password):
