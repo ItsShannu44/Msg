@@ -519,18 +519,30 @@ def handle_send_message(data):
     cursor.execute(
         '''INSERT INTO messages (sender_id, recipient_id, message, timestamp_utc)
            VALUES (?, ?, ?, ?)''',
-        (data['sender_id'], data['recipient_id'], data['message'],timestamp)
+        (data['sender_id'], data['recipient_id'], data['message'], timestamp)
     )
+    
+    message_id = cursor.lastrowid  # Get the ID of the inserted message
 
     conn.commit()
     conn.close()
 
-    timestamp = datetime.utcnow().isoformat()
-    print(f"Emitting message to recipient {data['recipient_id']} and sender {data['sender_id']}")
-    # Emit to recipient's room
-    emit('receive_message', {**data, 'sender_username': current_user.username,'status': 'sent'}, room=data['recipient_id'])
-    # Emit to sender's room for echo
-    emit('receive_message', {**data, 'sender_username': current_user.username,'status': 'sent'}, room=data['sender_id'])
+    # Include message_id in the emitted data
+    emit('receive_message', {
+        **data, 
+        'sender_username': current_user.username,
+        'status': 'sent',
+        'message_id': message_id,
+        'timestamp': timestamp
+    }, room=data['recipient_id'])
+    
+    emit('receive_message', {
+        **data, 
+        'sender_username': current_user.username,
+        'status': 'sent',
+        'message_id': message_id,
+        'timestamp': timestamp
+    }, room=data['sender_id'])
 
 
 
