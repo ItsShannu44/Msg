@@ -1824,86 +1824,62 @@ text-align: center;
     }
 }
 
+/* Delete buttons in selection toolbar */
+#delete-for-me-selected {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+}
 
+#delete-for-everyone-selected {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
 
-
-/* Delete Message Button */
-.msg-delete-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: none;
+#delete-for-me-selected,
+#delete-for-everyone-selected {
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
-    width: 24px;
-    height: 24px;
+    border: none;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s;
+    font-size: 18px;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
 }
 
-.msg:hover .msg-delete-btn {
+#delete-for-me-selected:hover,
+#delete-for-everyone-selected:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px currentColor;
+}
+
+/* Tooltip for delete buttons */
+#delete-for-me-selected::after,
+#delete-for-everyone-selected::after {
+    content: attr(title);
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+#delete-for-me-selected:hover::after,
+#delete-for-everyone-selected:hover::after {
     opacity: 1;
 }
 
-.msg.deleted .msg-delete-btn {
-    display: none;
-}
-
-/* Delete Dropdown Menu */
-.delete-dropdown {
-    position: absolute;
-    top: 30px;
-    right: 5px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    z-index: 100;
-    display: none;
-    min-width: 160px;
-}
-
-.delete-dropdown.show {
-    display: block;
-}
-
-.delete-option {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-    color: #333;
-    font-size: 14px;
-}
-
-.delete-option:hover {
-    background: #f5f5f5;
-}
-
-.delete-option:last-child {
-    border-bottom: none;
-}
-
-.delete-option.delete-for-me {
-    color: #666;
-}
-
-.delete-option.delete-for-everyone {
-    color: #e74c3c;
-    font-weight: bold;
-}
-
-.msg.deleted {
-    opacity: 0.7;
-    background-color: #f8f9fa !important;
-}
-
-.msg.deleted .msg-message {
-    color: #999;
-    font-style: italic;
+/* Hide delete for everyone button when user doesn't have permission */
+#delete-for-everyone-selected.hidden {
+    display: none !important;
 }
