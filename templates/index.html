@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KwikChat</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="website icon" type="png" href="/static/KwikChat_logo.png">
@@ -11,910 +10,671 @@
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
-        <!-- <script>
-        // Apply theme IMMEDIATELY before page renders
-        (function() {
-            const savedDarkMode = localStorage.getItem('darkMode');
-            if (savedDarkMode === 'enabled') {
-                document.documentElement.classList.add('dark-mode');
-            }
-            
-            const savedTheme = localStorage.getItem('themeColor');
-            if (savedTheme) {
-                document.documentElement.setAttribute('data-theme', savedTheme);
-            }
-        })();
-    </script> -->
 <body>
-            <!-- User Agreement Modal (will be shown only for new users) -->
-        <div class="user-agreement-modal" id="userAgreementModal">
-            <div class="agreement-container">
-                <div class="agreement-header">
-                    KwikChat User Agreement
+    <!-- User Agreement Modal (will be shown only for new users) -->
+    <div class="user-agreement-modal" id="userAgreementModal">
+        <div class="agreement-container">
+            <div class="agreement-header">
+                KwikChat User Agreement
+            </div>
+            <div class="agreement-content">
+                
+                <h3>Welcome to KwikChat!</h3>
+                <img src="static/KwikChat_logo.png" height="100" width="150">
+                <p>Before you start using our services, please read and agree to our Terms of Service and Privacy Policy.</p>
+                
+                <h4>1. Acceptance of Terms</h4>
+                <p>By clicking "Agree", you acknowledge that you have read, understood, and agree to be bound by:</p>
+                <ul>
+                    <li><a href="#" class="terms-link">Terms of Service</a></li>
+                    <li><a href="#" class="terms-link">Privacy Policy</a></li>
+                </ul>
+                
+                <h4>2. Key Points</h4>
+                <ul>
+                    <li>You must be at least 18 years old to use KwikChat</li>
+                    <li>You are responsible for maintaining the confidentiality of your account</li>
+                    <li>KwikChat may collect and use your data as described in our Privacy Policy</li>
+                    <li>KwikChat is highly secured. It prevents your data loss.</li>
+                    <li>We may update these terms occasionally and will notify you of significant changes</li>
+                </ul>
+                
+                <h4>3. Your Choices</h4>
+                <p>You can:</p>
+                <ul>
+                    <li>Request account deletion at any time</li>
+                    <li>Adjust privacy settings in your account</li>
+                    <li>Opt-out of non-essential data collection</li>
+                </ul>
+                
+                <div class="agreement-checkboxes">
+                    <div class="agreement-checkbox">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <label for="agreeTerms">I have read and agree to the Terms of Service and Privacy Policy</label>
+                    </div>
+                    <div class="agreement-checkbox">
+                        <input type="checkbox" id="agreeNotifications">
+                        <label for="agreeNotifications">I agree to receive important service notifications (optional)</label>
+                    </div>
                 </div>
-                <div class="agreement-content">
-                    
-                    <h3>Welcome to KwikChat!</h3>
-                    <img src="static/KwikChat_logo.png"  height="100" width="150">
-                    <p>Before you start using our services, please read and agree to our Terms of Service and Privacy Policy.</p>
-                    
-                    <h4>1. Acceptance of Terms</h4>
-                    <p>By clicking "Agree", you acknowledge that you have read, understood, and agree to be bound by:</p>
-                    <ul>
-                        <li><a href="#" class="terms-link">Terms of Service</a></li>
-                        <li><a href="#" class="terms-link">Privacy Policy</a></li>
-                    </ul>
-                    
-                    <h4>2. Key Points</h4>
-                    <ul>
-                        <li>You must be at least 18 years old to use KwikChat</li>
-                        <li>You are responsible for maintaining the confidentiality of your account</li>
-                        <li>KwikChat may collect and use your data as described in our Privacy Policy</li>
-                        <li>KwikChat is highly secured. It prevents your data loss.</li>
-                        <li>We may update these terms occasionally and will notify you of significant changes</li>
-                    </ul>
-                    
-                    <h4>3. Your Choices</h4>
-                    <p>You can:</p>
-                    <ul>
-                        <li>Request account deletion at any time</li>
-                        <li>Adjust privacy settings in your account</li>
-                        <li>Opt-out of non-essential data collection</li>
-                    </ul>
-                    
-                    <div class="agreement-checkboxes">
-                        <div class="agreement-checkbox">
-                            <input type="checkbox" id="agreeTerms" required>
-                            <label for="agreeTerms">I have read and agree to the Terms of Service and Privacy Policy</label>
-                        </div>
-                        <div class="agreement-checkbox">
-                            <input type="checkbox" id="agreeNotifications">
-                            <label for="agreeNotifications">I agree to receive important service notifications (optional)</label>
+            </div>
+            <div class="agreement-footer">
+                <button class="agreement-btn cancel-btn" id="cancelAgreement">Cancel Registration</button>
+                <button class="agreement-btn agree-btn" id="confirmAgreement" disabled>Agree and Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app">
+        <div class="header">
+            <div class="logo">
+                <a href="/"><img src="/static/KwikChat_logo.png" alt="KwikChat_logo"></a>
+            </div>
+            <div class="user-settings">
+                <div class="dark-light">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                    </svg>
+                </div>
+                <a href="/profile"><img class="user-profile" src="{{ url_for('get_profile_picture', user_id=current_user.id) }}" alt="Profile"></a>
+            </div>
+        </div>
+        
+        <div class="wrapper">
+            <div class="recents-area">
+                <div class="msg-detail">
+                    <div class="msg1">
+                        <h4>Recent Chats</h4>
+                        <input type="text" id="recent-user-search" placeholder="Search Recent Chats..." oninput="searchRecentUsers()" />
+                        <ul id="recent-chats">
+                            {% for chat in recent_chats %}
+                                <li onclick="startChat('{{ chat[0] }}', '{{ chat[1] }}')">
+                                    <img src="{{ url_for('get_profile_picture', user_id=chat[0]) if chat[0] else url_for('static', filename='default_profile.jpg') }}" alt="Profile Picture" class="profile-pic">
+                                    {{ chat[1] }}
+                                </li>
+                            {% endfor %}
+                        </ul>                
+                    </div>
+                </div>
+                <div class="registeredusers">
+                    <div class="msg-detail1">
+                        <div class="msg2">
+                            <h4>Registered Users</h4>
+                            <input type="text" id="user-search" placeholder="Search Users..." oninput="searchUsers()" />
+                            <ul id="user-list">
+                                {% for user in users %}
+                                    <li onclick="startChat('{{ user[0] }}', '{{ user[1] }}')">
+                                        <img src="{{ url_for('get_profile_picture', user_id=user[0]) if user[0] else url_for('static', filename='default_profile.jpg') }}" alt="Profile Picture" class="profile-pic">
+                                        {{ user[1] }}
+                                    </li>
+                                {% endfor %}
+                            </ul>          
                         </div>
                     </div>
                 </div>
-                <div class="agreement-footer">
-                    <button class="agreement-btn cancel-btn" id="cancelAgreement">Cancel Registration</button>
-                    <button class="agreement-btn agree-btn" id="confirmAgreement" disabled>Agree and Continue</button>
-                </div>
-            </div>
-        </div>
-
-
-
-
-
-
-<div class="app">
-    <div class="header">
-        <div class="logo">+
-            <a href="/"><img src="/static/KwikChat_logo.png" alt="KwikChat_logo"></a>
-        </div>
-        <!-- <div class="searchbar">
-            <input type="text" id="conv-search" placeholder="Search...">
-        </div> -->
-        <div class="user-settings">
-        <div class="dark-light">
-            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" /></svg>
-        </div>
-        
-        <a href="/profile"><img class="user-profile" src="{{ url_for('get_profile_picture', user_id=current_user.id) }}"></a>
-        </div>
-    </div>
-<div class="wrapper">
-    <div class="recents-area">
-        <div class="msg-detail">
-            <div class="msg1">
-                <h4>Recent Chats</h4>
-                <input type="text" id="recent-user-search" placeholder="Search Recent Chats..." oninput="searchRecentUsers()" />
-                <ul id="recent-chats">
-                    {% for chat in recent_chats %}
-                        <li onclick="startChat('{{ chat[0] }}', '{{ chat[1] }}')">
-                            <img src="{{ url_for('get_profile_picture', user_id=last_chat_user_id) if last_chat_user_id else url_for('static', filename='default_profile.jpg') }}" alt="Profile Picture" class="profile-pic">
-                            {{ chat[1] }}
-                        </li>
-                    {% endfor %}
-                </ul>                
-            </div>
-        </div>
-        <div class="registeredusers">
-            <div class="msg-detail1">
-                <div class="msg2">
-                <h4>Registered Users</h4>
-                <input type="text" id="user-search" placeholder="Search Users..." oninput="searchUsers()" />
-                <ul id="user-list">
-                    {% for user in users %}
-                        <li onclick="startChat('{{ user[0] }}', '{{ user[1] }}')">
-                            <img src="{{ url_for('get_profile_picture', user_id=user[0])if user[0] else url_for('static', filename='default_profile.jpg')}}" alt="Profile Picture" class="profile-pic">
-                            {{ user[1] }}
-                        </li>
-                    {% endfor %}
-                </ul>          
-            </div>
-            </div>
-            </div>
-        <button class="add" id="addtoggleButton"></button>
-        <div class="overlay"></div>
-    </div>  
-<div class="chatdiv">
-    <div id="voiceAnimation" class="voice-screen">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="wave"></div>
-    </div>        
-<div class="chat-area">
-    <div class="chat-header">
-        <div class="chat-profile">
-        <img id="chat-profile-pic" src="/static/default_profile.jpg" alt="Profile Picture" class="profile-pic">
-        <h2 id="chat-with">Select a user to chat</h2>
-        </div>
-        <div class="online-menu">
-        <p id="user-online-status"></p> 
-        <div class="chat-menu">
-        <button class="menu-toggle" id="three-dots">⋮</button>
-            <div class="menu-dropdown" id="menuDropdown">
-                <a id="clear-chat-button" onclick="clearChat()">Clear Chat</a>
-                </div>
-        </div> 
-        </div>
-    </div>   
-    <div class="conversation-area" id="conversation-area">
-        <div class="chatArea">
-        <!-- Messages will be displayed here -->
-        </div>
-    </div>
-</div>
-<a id="scroll-down-btn"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-<polyline points="7 13 12 18 17 13"></polyline>
-<polyline points="7 6 12 11 17 6"></polyline></svg></a>
-<div class="chat-area-footer">
-    <input type="text" id="TxtMessage" placeholder="Type a message..." />
-    <button id="startVoice">Start Voice</button>
-    <button class="bt" id="send-button" value="submit">Send</button>
-</div>
-</div>
-<div class="detail-area">
-<div class="detail-area-header">
-<div class="profile-area" id="profile-area">
-    <h3>User Profile</h3>
-    <div class="pic">
-    <img id="chat-profile-picture" src="/static/default_profile.jpg" alt="Profile Picture" class="chat-profile-picture"></div>
-        <p id="profile-details">Select User</p>
-    </div>
-</div>
-<div class="detail-changes">    
-    <input type="text" id="conversation-search" placeholder="Search in Conversation">
-    <div class="detail-change">
-     <p>Customize Theme</p>
-     <div class="colors">
-      <div class="color blue selected" data-color="blue"></div>
-      <div class="color purple" data-color="purple"></div>
-      <div class="color green" data-color="green"></div>
-      <div class="color orange" data-color="orange"></div>
-     </div>
-    </div>
-    <button id="refresh-profile">🔄 Refresh</button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Message Selection Toolbar -->
-<!-- Premium Message Selection Toolbar -->
-<div id="selection-toolbar">
-    <div class="selection-info">
-        <span id="selection-count">0</span> selected
-    </div>
-
-    <div class="selection-actions">
-        <button id="copy-selected" title="Copy">
-            <i class="fas fa-copy"></i>
-        </button>
-        <button id="delete-for-me-selected" title="Delete for me">
-            <i class="fas fa-user-minus"></i>
-        </button>
-        <button id="delete-for-everyone-selected" title="Delete for everyone">
-            <i class="fas fa-trash-alt"></i>
-        </button>
-        <button id="cancel-selection" title="Cancel">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-</div>
-
-</body>
-<script>
-
-/////////////////////////////////////////////////////////////////////////
-const socket = io(); // Initialize Socket.IO
-let currentRecipientId = {{ default_recipient_id if default_recipient_id else 'null' }};
-let currentUserId = {{ current_user.id }};
-
-window.onload = function () {
-    let lastChatUserId = {{ last_chat_user_id if last_chat_user_id else 'null' }};
-    if (lastChatUserId) {
-        startChat(lastChatUserId, 'Recent User'); // Start the chat with the last user
-    }
-        // Start fetching recent chats and users every second
-        setInterval(fetchRecentChats, 1000);
-    setInterval(fetchOnlineUsers, 1000); 
-};
-
-function logout() {
-    fetch('/logout', { method: 'POST' })
-        .then(() => window.location.href = '/login')
-        .catch(error => console.error("Logout failed:", error));
-}
-
-
-document.getElementById('send-button').addEventListener('click', () => {
-    const messageInput = document.getElementById('TxtMessage');
-    const message = messageInput.value;
-
-    if (message && currentRecipientId) {
-        const timestamp = new Date().toISOString(); // Sends timestamp in UTC format
-
-        socket.emit('send_message', {
-            sender_id: currentUserId,
-            recipient_id: currentRecipientId,
-            message: message,
-            timestamp: timestamp // Include timestamp in the emitted message
-        });
-
-        addMessageToConversation('You', message, true, timestamp); // true for sender
-        messageInput.value = ''; // Clear the input field
-    }
-});
-
-function formatTimestamp(utcString) {
-    const date = new Date(utcString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-}
-let lastDate = '';
-// Update the addMessageToConversation function
-function addMessageToConversation(sender, message, isSender, timestamp, senderProfilePic, receiverProfilePic, messageId = null, canDeleteForEveryone = false, isDeleted = false) {
-    const conversationArea = document.getElementById('conversation-area');
-    const formattedTimestamp = formatTimestamp(timestamp);
-    const msgDiv = document.createElement('div');
-    msgDiv.className = isSender ? 'msg sender' : 'msg receiver';
-    
-    if (isDeleted) {
-        msgDiv.classList.add('deleted');
-        message = '[Deleted]';
-    }
-    
-    msgDiv.dataset.messageId = messageId;
-    msgDiv.dataset.senderId = isSender ? currentUserId : currentRecipientId;
-    msgDiv.dataset.canDeleteForEveryone = canDeleteForEveryone;
-    
-    const messageDate = new Date(timestamp).toDateString();
-    
-    if (messageDate !== lastDate) {
-        lastDate = messageDate;
-        const dateDiv = document.createElement("div");
-        dateDiv.className = "msg-date";
-        dateDiv.textContent = messageDate;
-        conversationArea.appendChild(dateDiv);
-    }
-
-    let profilePicUrl = isSender 
-    ? `/profile_picture/${currentUserId}`
-    : receiverProfilePic || `/profile_picture/${currentRecipientId}` || "/default_profile.png";
-
-    msgDiv.innerHTML = `
-        <div class="msg-detail">
-            <div class="msg-content">
-                <span class="msg-message">${message}</span>
-                <span class="msg-time">${formattedTimestamp}</span>
-            </div>
-            <img class="msg-profile-pic" src="${profilePicUrl}" alt="${sender}'s Profile">
-        </div>
-    `;
-    
-    // Add delete button for sender's messages that aren't deleted for everyone
-    if (isSender && messageId && !isDeleted) {
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'msg-delete-btn';
-        deleteBtn.innerHTML = '×';
-        deleteBtn.title = 'Delete message';
-        
-        const dropdown = document.createElement('div');
-        dropdown.className = 'delete-dropdown';
-        dropdown.innerHTML = `
-            <div class="delete-option delete-for-me" onclick="deleteMessage(${messageId}, 'for_me')">
-                Delete for me
-            </div>
-            <div class="delete-option delete-for-everyone" onclick="deleteMessage(${messageId}, 'for_everyone')">
-                Delete for everyone
-            </div>
-        `;
-        
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            document.querySelectorAll('.delete-dropdown').forEach(d => d.classList.remove('show'));
-            dropdown.classList.toggle('show');
-        };
-        
-        msgDiv.appendChild(deleteBtn);
-        msgDiv.appendChild(dropdown);
-    }
-    
-    // Add delete button for receiver's messages (only delete for me)
-    if (!isSender && messageId && !isDeleted) {
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'msg-delete-btn';
-        deleteBtn.innerHTML = '×';
-        deleteBtn.title = 'Delete for me';
-        
-        deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (confirm('Delete this message for you?')) {
-                deleteMessage(messageId, 'for_me');
-            }
-        };
-        
-        msgDiv.appendChild(deleteBtn);
-    }
-
-    conversationArea.appendChild(msgDiv);
-
-    setTimeout(() => {
-        conversationArea.scrollTop = conversationArea.scrollHeight;
-    }, 100);
-    
-    // Close dropdown when clicking elsewhere
-    document.addEventListener('click', (e) => {
-        if (!msgDiv.contains(e.target)) {
-            dropdown.classList.remove('show');
-        }
-    });
-}
-
-
-
-socket.on("status_updated", (data) => {
-    updateMessageStatus(data.index, data.status);
-});
-
-///////////////////////////////////////////////////////////////////////
-
-socket.on("user_online", (data) => {
-    // Check if the user is the current recipient
-    if (data.user_id === currentRecipientId) {
-        markMessagesAsRead(); // Call to mark messages as read
-    }
-});
-
-
-
-
-////////////////////////////////RESTORE MSG TICK////////////////
-socket.on('receive_message', (data) => {
-    if (data.recipient_id === currentUserId) {
-        addMessageToConversation(
-            data.sender_id === currentUserId ? 'You' : data.sender_username, 
-            data.message, 
-            false,
-            data.timestamp,
-            data.sender_profile_picture,
-            `/profile_picture/${data.sender_id}`,
-            data.message_id,
-            data.sender_id === currentUserId,
-            false
-        );
-        fetchRecentChats();
-    }
-});
-
-//////////////////////
-document.addEventListener("DOMContentLoaded", function() {
-    document.querySelectorAll(".chat-item").forEach(item => {
-        item.addEventListener("click", function(event) {
-            event.preventDefault();  // Prevent link behavior
-            let userId = this.getAttribute("data-user-id");
-            let username = this.innerText; // Get the username from the link text
-            startChat(userId, username); // Start the chat with the clicked user
-        });
-    });
-    const threeDotsButton = document.getElementById("three-dots");
-    const menuDropdown = document.getElementById("menuDropdown");
-
-    // Toggle dropdown visibility
-    threeDotsButton.addEventListener("click", function(event) {
-        event.stopPropagation(); // Prevent event from bubbling up to the window
-        menuDropdown.style.display = menuDropdown.style.display === "block" ? "none" : "block";
-    });
-
-    // Close dropdown when clicking outside
-    window.addEventListener("click", function() {
-        menuDropdown.style.display = "none";
-    });
-});
-
-function openChat(userId, username) {
-    // Load messages for the selected user
-    fetchMessages(userId);
-
-    // Optionally update the UI to reflect the currently opened chat
-    document.getElementById('current-chat-user').innerText = username;
-
-    // Update the session variable for the last opened chat
-    fetch(`/update_last_chat/${userId}`, {
-        method: 'POST',
-        credentials: 'same-origin' // Ensure cookies are sent with the request
-    });
-}
-
-///////////////////////////////////////////////TIME////////////////////////////
-function getLocalTimestamp() {
-    const now = new Date();
-    return now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, '0') + "-" +
-            String(now.getDate()).padStart(2, '0') + " " +
-            String(now.getHours()).padStart(2, '0') + ":" +
-            String(now.getMinutes()).padStart(2, '0') + ":" +
-            String(now.getSeconds()).padStart(2, '0');
-}
-/////////////////////////////////////////////////////////////////////
-// Update the sendMessage function to use the current UTC timestamp
-function sendMessage() {
-    const messageInput = document.getElementById('TxtMessage');
-    const message = messageInput.value.trim();
-    if (!message) return;
-
-    const recipientId = document.getElementById('recipient-id').value;
-
-    // Use ISO format for the timestamp
-    const timestamp = new Date().toISOString();
-    console.log("Timestamp Sent to Backend:", timestamp);  // Debugging log
-
-    const data = {
-        sender_id: currentUserId,
-        recipient_id: recipientId,
-        message: message,
-        timestamp: timestamp
-    };
-
-    fetch('/send_message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    }).then(response => {
-        if (response.ok) {
-            console.log("Message sent successfully!");
-            messageInput.value = ''; // Clear input
-            fetchRecentChats(); // Refresh recent chats list
-        }
-    }).catch(error => console.error("Error sending message:", error));
-}
-
-// Clear the chat window
-function clearChat() {
-            const conversationArea = document.getElementById('conversation-area');
-            conversationArea.innerHTML = ''; // Clear the messages in the chat area
-            alert("Chat with " + document.getElementById('chat-with').innerText + " has been cleared.");
-        }
-
-async function clearChat() {
-const conversationArea = document.getElementById('conversation-area');
-const chatWith = document.getElementById('chat-with').innerText; // Get the user you're chatting with
-
-const confirmation = confirm("Are you sure you want to clear the chat? Once deleted, it cannot be recovered.");
-
-if (confirmation) {
-conversationArea.innerHTML = '';
-// Call the API to clear the chat in db
-await fetch(`/clear_chat/${currentRecipientId}`, { method: 'POST' });
-
-alert("Chat with " + chatWith + " has been cleared.");
-}
-}
-
-////////////////////////////////////////////////////////////////////////////////////
-// Add click listeners to all recent chats
-document.querySelectorAll('.recent-chat').forEach(item => {
-    item.addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent default link behavior
-        let recipientId = this.getAttribute('data-recipient-id');
-        let username = this.innerText; // Get the username from the clicked link
-        startChat(recipientId, username); // Start the chat with the clicked user
-    });
-});
-//////////////////////////////////////////////////////////////////////////////////////
-function startChat(recipientId, username) {
-    currentRecipientId = recipientId;
-
-    // Update the chat header with the username
-    document.getElementById('chat-with').innerText = username;
-    document.getElementById('profile-details').innerText = `${username}`;
-
-    // Set profile picture source dynamically
-    const profilePicDetail = document.getElementById('chat-profile-picture');
-    const profilePicElement = document.getElementById('chat-profile-pic');
-    profilePicElement.src = `/profile_picture/${recipientId}`;
-    profilePicElement.style.display = 'block';  // Ensure it is visible
-    profilePicDetail.src = `/profile_picture/${recipientId}`;
-    profilePicDetail.style.display = 'block';  // Ensure it is visible
-
-    // Fetch chat messages
-    fetchMessages(recipientId);
-
-    // Fetch the recipient's online status
-    fetch(`/user_status/${recipientId}`)
-        .then(response => response.json())
-        .then(data => {
-            updateStatusElement(recipientId, data.online);
-        })
-        .catch(error => console.error('Error fetching user status:', error));
-}
-
-
-
-function updateStatusElement(userId, isOnline) {
-    const statusElement = document.getElementById('user-online-status');
-    if (isOnline) {
-        statusElement.innerText = " online";
-        statusElement.style.color = "green";
-    } else {
-        statusElement.innerText = " offline";
-        statusElement.style.color = "red";
-    }
-}
-socket.on('connect', () => {
-    console.log("Connected to socket.io server"); // Debugging
-});
-
-// Update fetchMessages function
-async function fetchMessages(recipientId) {
-    console.log("fetch");
-    const response = await fetch(`/get_messages/${recipientId}`);
-    const messages = await response.json();
-    const conversationArea = document.getElementById('conversation-area');
-    conversationArea.innerHTML = '';
-    console.log(messages);
-    
-    messages.forEach(msg => {
-        const isSender = msg.sender_id === currentUserId;
-        addMessageToConversation(
-            msg.username, 
-            msg.display_message, 
-            isSender, 
-            msg.timestamp, 
-            null, 
-            null,
-            msg.message_id,
-            msg.can_delete_for_everyone,
-            msg.is_deleted
-        );
-    });
-    
-    socket.emit("update_status", { index: messages.length - 1, status: "read" });
-    conversationArea.scrollTop = conversationArea.scrollHeight;
-}
-
-// Add deleteMessage function
-async function deleteMessage(messageId, deleteType) {
-    try {
-        const response = await fetch('/delete_message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message_id: messageId,
-                delete_type: deleteType
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // Close any open dropdowns
-            document.querySelectorAll('.delete-dropdown').forEach(d => d.classList.remove('show'));
+                <button class="add" id="addtoggleButton"></button>
+                <div class="overlay"></div>
+            </div>  
             
-            // If deleting for everyone, wait for socket event
-            // If deleting for me, update immediately
-            if (deleteType === 'for_me') {
-                const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
-                if (msgElement) {
+            <div class="chatdiv">
+                <div id="voiceAnimation" class="voice-screen">
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                    <div class="wave"></div>
+                </div>        
+                
+                <div class="chat-area">
+                    <div class="chat-header">
+                        <div class="chat-profile">
+                            <img id="chat-profile-pic" src="/static/default_profile.jpg" alt="Profile Picture" class="profile-pic">
+                            <h2 id="chat-with">Select a user to chat</h2>
+                        </div>
+                        <div class="online-menu">
+                            <p id="user-online-status"></p> 
+                            <div class="chat-menu">
+                                <button class="menu-toggle" id="three-dots">⋮</button>
+                                <div class="menu-dropdown" id="menuDropdown">
+                                    <a id="clear-chat-button" onclick="clearChat()">Clear Chat</a>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>   
+                    
+                    <div class="conversation-area" id="conversation-area">
+                        <div class="chatArea">
+                            <!-- Messages will be displayed here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <a id="scroll-down-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="7 13 12 18 17 13"></polyline>
+                        <polyline points="7 6 12 11 17 6"></polyline>
+                    </svg>
+                </a>
+                
+                <div class="chat-area-footer">
+                    <input type="text" id="TxtMessage" placeholder="Type a message..." />
+                    <button id="startVoice">Start Voice</button>
+                    <button class="bt" id="send-button" value="submit">Send</button>
+                </div>
+            </div>
+            
+            <div class="detail-area">
+                <div class="detail-area-header">
+                    <div class="profile-area" id="profile-area">
+                        <h3>User Profile</h3>
+                        <div class="pic">
+                            <img id="chat-profile-picture" src="/static/default_profile.jpg" alt="Profile Picture" class="chat-profile-picture">
+                        </div>
+                        <p id="profile-details">Select User</p>
+                    </div>
+                </div>
+                <div class="detail-changes">    
+                    <input type="text" id="conversation-search" placeholder="Search in Conversation">
+                    <div class="detail-change">
+                        <p>Customize Theme</p>
+                        <div class="colors">
+                            <div class="color blue selected" data-color="blue"></div>
+                            <div class="color purple" data-color="purple"></div>
+                            <div class="color green" data-color="green"></div>
+                            <div class="color orange" data-color="orange"></div>
+                        </div>
+                    </div>
+                    <button id="refresh-profile">🔄 Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Premium Message Selection Toolbar -->
+    <div id="selection-toolbar">
+        <div class="selection-info">
+            <span id="selection-count">0</span> selected
+        </div>
+        <div class="selection-actions">
+            <button id="copy-selected" title="Copy">
+                <i class="fas fa-copy"></i>
+            </button>
+            <button id="delete-for-me-selected" title="Delete for me">
+                <i class="fas fa-user-minus"></i>
+            </button>
+            <button id="delete-for-everyone-selected" title="Delete for everyone">
+                <i class="fas fa-trash-alt"></i>
+            </button>
+            <button id="cancel-selection" title="Cancel">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /////////////////////////////////////////////////////////////////////////
+        const socket = io(); // Initialize Socket.IO
+        let currentRecipientId = {{ default_recipient_id if default_recipient_id else 'null' }};
+        let currentUserId = {{ current_user.id }};
+        let lastDate = '';
+
+        window.onload = function () {
+            let lastChatUserId = {{ last_chat_user_id if last_chat_user_id else 'null' }};
+            if (lastChatUserId) {
+                startChat(lastChatUserId, 'Recent User'); // Start the chat with the last user
+            }
+            // Start fetching recent chats and users every second
+            setInterval(fetchRecentChats, 1000);
+        };
+
+        function logout() {
+            fetch('/logout', { method: 'POST' })
+                .then(() => window.location.href = '/login')
+                .catch(error => console.error("Logout failed:", error));
+        }
+
+        document.getElementById('send-button').addEventListener('click', () => {
+            const messageInput = document.getElementById('TxtMessage');
+            const message = messageInput.value.trim();
+
+            if (message && currentRecipientId) {
+                const timestamp = new Date().toISOString();
+
+                socket.emit('send_message', {
+                    sender_id: currentUserId,
+                    recipient_id: currentRecipientId,
+                    message: message,
+                    timestamp: timestamp
+                });
+
+                addMessageToConversation('You', message, true, timestamp, null, null, null, false, false);
+                messageInput.value = ''; // Clear the input field
+            }
+        });
+
+        function formatTimestamp(utcString) {
+            const date = new Date(utcString);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+
+        // Update the addMessageToConversation function
+        function addMessageToConversation(sender, message, isSender, timestamp, senderProfilePic, receiverProfilePic, messageId = null, canDeleteForEveryone = false, isDeleted = false) {
+            const conversationArea = document.getElementById('conversation-area');
+            const formattedTimestamp = formatTimestamp(timestamp);
+            const msgDiv = document.createElement('div');
+            msgDiv.className = isSender ? 'msg sender' : 'msg receiver';
+            
+            if (isDeleted) {
+                msgDiv.classList.add('deleted');
+                message = '[Deleted]';
+            }
+            
+            msgDiv.dataset.messageId = messageId;
+            msgDiv.dataset.senderId = isSender ? currentUserId : currentRecipientId;
+            msgDiv.dataset.canDeleteForEveryone = canDeleteForEveryone;
+            
+            const messageDate = new Date(timestamp).toDateString();
+            
+            if (messageDate !== lastDate) {
+                lastDate = messageDate;
+                const dateDiv = document.createElement("div");
+                dateDiv.className = "msg-date";
+                dateDiv.textContent = messageDate;
+                conversationArea.appendChild(dateDiv);
+            }
+
+            let profilePicUrl = isSender 
+                ? `/profile_picture/${currentUserId}`
+                : receiverProfilePic || `/profile_picture/${currentRecipientId}` || "/static/default_profile.jpg";
+
+            msgDiv.innerHTML = `
+                <div class="msg-detail">
+                    <div class="msg-content">
+                        <span class="msg-message">${message}</span>
+                        <span class="msg-time">${formattedTimestamp}</span>
+                    </div>
+                    <img class="msg-profile-pic" src="${profilePicUrl}" alt="${sender}'s Profile">
+                </div>
+            `;
+
+
+            conversationArea.appendChild(msgDiv);
+
+            setTimeout(() => {
+                conversationArea.scrollTop = conversationArea.scrollHeight;
+            }, 100);
+        }
+
+        // Listen for deletion events from socket
+        socket.on('message_deleted', function(data) {
+            const msgElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+            
+            if (msgElement) {
+                if (data.delete_type === 'for_everyone') {
                     msgElement.classList.add('deleted');
                     const msgContent = msgElement.querySelector('.msg-message');
                     if (msgContent) {
-                        msgContent.textContent = currentUserId === parseInt(msgElement.dataset.senderId) 
-                            ? '[You deleted this message]' 
-                            : '[Message deleted]';
+                        msgContent.textContent = '[This message was deleted]';
+                    }
+                    // Hide delete button
+                    const deleteBtn = msgElement.querySelector('.msg-delete-btn');
+                    if (deleteBtn) deleteBtn.style.display = 'none';
+                }
+            }
+        });
+
+        socket.on("user_online", (data) => {
+            // Check if the user is the current recipient
+            if (data.user_id === currentRecipientId) {
+                updateStatusElement(data.user_id, true);
+            }
+        });
+
+        socket.on("user_offline", (data) => {
+            // Check if the user is the current recipient
+            if (data.user_id === currentRecipientId) {
+                updateStatusElement(data.user_id, false);
+            }
+        });
+
+        socket.on('receive_message', (data) => {
+            if (data.recipient_id === currentUserId) {
+                addMessageToConversation(
+                    data.sender_id === currentUserId ? 'You' : data.sender_username, 
+                    data.message, 
+                    false,
+                    data.timestamp,
+                    data.sender_profile_picture,
+                    `/profile_picture/${data.sender_id}`,
+                    data.message_id,
+                    data.sender_id === currentUserId,
+                    false
+                );
+                fetchRecentChats();
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const threeDotsButton = document.getElementById("three-dots");
+            const menuDropdown = document.getElementById("menuDropdown");
+
+            // Toggle dropdown visibility
+            if (threeDotsButton) {
+                threeDotsButton.addEventListener("click", function(event) {
+                    event.stopPropagation();
+                    if (menuDropdown) {
+                        menuDropdown.style.display = menuDropdown.style.display === "block" ? "none" : "block";
+                    }
+                });
+            }
+
+            // Close dropdown when clicking outside
+            window.addEventListener("click", function() {
+                if (menuDropdown) {
+                    menuDropdown.style.display = "none";
+                }
+            });
+        });
+
+        async function clearChat() {
+            const conversationArea = document.getElementById('conversation-area');
+            const chatWith = document.getElementById('chat-with').innerText;
+
+            const confirmation = confirm("Are you sure you want to clear the chat? Once deleted, it cannot be recovered.");
+
+            if (confirmation) {
+                conversationArea.innerHTML = '';
+                // Call the API to clear the chat in db
+                await fetch(`/clear_chat/${currentRecipientId}`, { method: 'POST' });
+                alert("Chat with " + chatWith + " has been cleared.");
+            }
+        }
+
+        function startChat(recipientId, username) {
+            currentRecipientId = recipientId;
+
+            // Update the chat header with the username
+            document.getElementById('chat-with').innerText = username;
+            document.getElementById('profile-details').innerText = `${username}`;
+
+            // Set profile picture source dynamically
+            const profilePicDetail = document.getElementById('chat-profile-picture');
+            const profilePicElement = document.getElementById('chat-profile-pic');
+            profilePicElement.src = `/profile_picture/${recipientId}`;
+            profilePicElement.style.display = 'block';
+            profilePicDetail.src = `/profile_picture/${recipientId}`;
+            profilePicDetail.style.display = 'block';
+
+            // Fetch chat messages
+            fetchMessages(recipientId);
+
+            // Fetch the recipient's online status
+            fetch(`/user_status/${recipientId}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateStatusElement(recipientId, data.online);
+                })
+                .catch(error => console.error('Error fetching user status:', error));
+        }
+
+        function updateStatusElement(userId, isOnline) {
+            const statusElement = document.getElementById('user-online-status');
+            if (isOnline) {
+                statusElement.innerText = " online";
+                statusElement.style.color = "green";
+            } else {
+                statusElement.innerText = " offline";
+                statusElement.style.color = "red";
+            }
+        }
+
+        // Update fetchMessages function
+        async function fetchMessages(recipientId) {
+            try {
+                const response = await fetch(`/get_messages/${recipientId}`);
+                const messages = await response.json();
+                const conversationArea = document.getElementById('conversation-area');
+                conversationArea.innerHTML = '';
+                lastDate = ''; // Reset date tracking
+                
+                messages.forEach(msg => {
+                    const isSender = msg.sender_id === currentUserId;
+                    addMessageToConversation(
+                        msg.username, 
+                        msg.display_message || msg.message, 
+                        isSender, 
+                        msg.timestamp, 
+                        null, 
+                        null,
+                        msg.message_id,
+                        msg.can_delete_for_everyone || false,
+                        msg.is_deleted || false
+                    );
+                });
+                
+                conversationArea.scrollTop = conversationArea.scrollHeight;
+            } catch (error) {
+                console.error('Error fetching messages:', error);
+            }
+        }
+
+        // Delete single message function
+        async function deleteMessage(messageId, deleteType) {
+            try {
+                const response = await fetch('/delete_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message_id: messageId,
+                        delete_type: deleteType
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Close any open dropdowns
+                    document.querySelectorAll('.delete-dropdown').forEach(d => d.classList.remove('show'));
+                    
+                    // Update message display immediately
+                    const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+                    if (msgElement) {
+                        msgElement.classList.add('deleted');
+                        const msgContent = msgElement.querySelector('.msg-message');
+                        if (msgContent) {
+                            if (deleteType === 'for_everyone') {
+                                msgContent.textContent = '[This message was deleted]';
+                            } else if (deleteType === 'for_me') {
+                                const isSender = parseInt(msgElement.dataset.senderId) === currentUserId;
+                                msgContent.textContent = isSender ? '[You deleted this message]' : '[Message deleted]';
+                            }
+                        }
+                    }
+                } else {
+                    alert(result.error || 'Failed to delete message');
+                }
+            } catch (error) {
+                console.error('Error deleting message:', error);
+                alert('Error deleting message');
+            }
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.msg-delete-btn') && !e.target.closest('.delete-dropdown')) {
+                document.querySelectorAll('.delete-dropdown').forEach(dropdown => {
+                    dropdown.classList.remove('show');
+                });
+            }
+        });
+
+        async function fetchRecentChats() {
+            try {
+                const response = await fetch('/get_recent_chats');
+                const recentChats = await response.json();
+                const recentChatsArea = document.getElementById('recent-chats');
+                let searchInput = document.getElementById("recent-user-search").value.toLowerCase();
+                let selectedUserId = localStorage.getItem("selectedUserId");
+
+                // Store existing chat IDs to check for changes
+                const existingChatIds = Array.from(recentChatsArea.children).map(item => item.dataset.userId);
+                const newChatIds = recentChats.map(chat => chat.user_id);
+
+                // If no changes, do nothing
+                if (JSON.stringify(existingChatIds) === JSON.stringify(newChatIds)) {
+                    return;
+                }
+
+                recentChatsArea.innerHTML = '';
+
+                recentChats.forEach((chat) => {
+                    const { user_id, username, profile_picture } = chat;
+
+                    // Create list item for chat
+                    const chatItem = document.createElement('li');
+                    chatItem.classList.add('chat-item');
+                    chatItem.dataset.userId = user_id;
+                    chatItem.onclick = () => {
+                        startChat(user_id, username);
+                        localStorage.setItem("selectedUserId", user_id);
+                        updateSelectedChat();
+                    };       
+
+                    // Create profile picture element
+                    const profilePic = document.createElement('img');
+                    profilePic.src = profile_picture || '/static/default_profile.jpg';
+                    profilePic.alt = `${username}'s profile picture`;
+                    profilePic.classList.add('profile-pic');
+
+                    // Create username text element
+                    const usernameText = document.createElement('span');
+                    usernameText.innerText = username;
+
+                    // Append elements
+                    chatItem.appendChild(profilePic);
+                    chatItem.appendChild(usernameText);
+                    recentChatsArea.appendChild(chatItem);
+                });
+
+                // Reapply selection after reloading
+                updateSelectedChat();
+                
+                if (searchInput) {
+                    searchRecentUsers();
+                }
+            } catch (error) {
+                console.error("Error fetching recent chats:", error);
+            }
+        }
+
+        // Function to update selected chat after list reload
+        function updateSelectedChat() {
+            let selectedUserId = localStorage.getItem("selectedUserId");
+            if (selectedUserId) {
+                let selectedChat = document.querySelector(`#recent-chats li[data-user-id="${selectedUserId}"]`);
+                if (selectedChat) {
+                    document.querySelectorAll("#recent-chats li").forEach(li => li.classList.remove("selected"));
+                    selectedChat.classList.add("selected");
+                }
+            }
+        }
+
+        function searchUsers() {
+            const searchQuery = document.getElementById('user-search').value.toLowerCase();
+            const userList = document.getElementById('user-list');
+            const users = userList.getElementsByTagName('li');
+
+            Array.from(users).forEach(user => {
+                const username = user.innerText.toLowerCase();
+                if (username.includes(searchQuery)) {
+                    user.style.display = '';
+                } else {
+                    user.style.display = 'none';
+                }
+            });
+        }
+
+        function searchRecentUsers() {
+            let input = document.getElementById("recent-user-search").value.toLowerCase();
+            let chatList = document.getElementById("recent-chats");
+            let users = chatList.getElementsByTagName("li");
+
+            for (let user of users) {
+                let username = user.textContent || user.innerText;
+                if (username.toLowerCase().includes(input)) {
+                    user.style.display = "";
+                } else {
+                    user.style.display = "none";
+                }
+            }
+        }
+
+        // Enter key to send message
+        document.getElementById('TxtMessage').addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                document.getElementById("send-button").click();
+            }
+        });
+
+        // Mobile view functions
+        function setupMobileView() {
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                if (!document.querySelector('.back-button')) {
+                    const backButton = document.createElement('button');
+                    backButton.className = 'back-button';
+                    backButton.innerHTML = '<i class="fas fa-arrow-left"></i>';
+                    backButton.addEventListener('click', goBackToRecents);
+
+                    const chatHeader = document.querySelector('.chat-header');
+                    if (chatHeader) {
+                        chatHeader.insertBefore(backButton, chatHeader.firstChild);
                     }
                 }
             }
-        } else {
-            alert(result.error || 'Failed to delete message');
         }
-    } catch (error) {
-        console.error('Error deleting message:', error);
-        alert('Error deleting message');
-    }
-}
 
-// Listen for deletion events from socket
-socket.on('message_deleted', function(data) {
-    const msgElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
-    
-    if (msgElement) {
-        if (data.delete_type === 'for_everyone') {
-            msgElement.classList.add('deleted');
-            const msgContent = msgElement.querySelector('.msg-message');
-            if (msgContent) {
-                msgContent.textContent = '[This message was deleted]';
+        function showChatOnMobile() {
+            if (window.innerWidth <= 768) {
+                const app = document.querySelector('.app');
+                if (app) app.classList.add('chat-active');
             }
-            // Hide delete button
-            const deleteBtn = msgElement.querySelector('.msg-delete-btn');
-            if (deleteBtn) deleteBtn.style.display = 'none';
-        } else if (data.delete_type === 'for_me' && data.deleted_by !== currentUserId) {
-            // Someone else deleted their copy, no action needed for us
-        }
-    }
-});
-    
-let firstLoad = true; // Flag to track initial page load
-
-async function fetchRecentChats() {
-    try {
-        const response = await fetch('/get_recent_chats');
-        const recentChats = await response.json();
-        const recentChatsArea = document.getElementById('recent-chats');
-        // Preserve current search input
-        let searchInput = document.getElementById("recent-user-search").value.toLowerCase();
-        let selectedUserId = localStorage.getItem("selectedUserId");
-
-        // Store existing chat IDs to check for changes
-        const existingChatIds = Array.from(recentChatsArea.children).map(item => item.dataset.userId);
-        const newChatIds = recentChats.map(chat => chat.user_id);
-
-        // If no changes, do nothing
-        if (JSON.stringify(existingChatIds) === JSON.stringify(newChatIds)) {
-            return;
         }
 
-        recentChatsArea.innerHTML = ''; // Clear previous chats
+        function goBackToRecents() {
+            const app = document.querySelector('.app');
+            if (app) app.classList.remove('chat-active');
+            
+            document.querySelectorAll('.msg1 ul li, .msg2 ul li').forEach(li => {
+                li.classList.remove('selected');
+            });
+            
+            currentRecipientId = null;
+            localStorage.removeItem("selectedUserId");
+        }
 
-        let mostRecentUserId = null;
-        let mostRecentUsername = null;
+        // Update startChat function to include mobile view
+        const originalStartChat = startChat;
+        startChat = function(recipientId, username) {
+            originalStartChat(recipientId, username);
+            showChatOnMobile();
+        };
 
-        recentChats.forEach((chat) => {
-            const { user_id, username, profile_picture } = chat;
+        window.addEventListener('resize', setupMobileView);
 
-            // Create list item for chat
-            const chatItem = document.createElement('li');
-            chatItem.classList.add('chat-item');
-            chatItem.dataset.userId = user_id; // Store user ID for comparison
-            chatItem.onclick = () => {
-                startChat(user_id, username);
-                localStorage.setItem("selectedUserId", user_id); // Save selected user
-                updateSelectedChat(); // Ensure the selection is updated
-            };       
-
-            // Create profile picture element
-            const profilePic = document.createElement('img');
-            profilePic.src = profile_picture;
-            profilePic.alt = `${username}'s profile picture`;
-            profilePic.classList.add('profile-pic');
-
-            // Create username text element
-            const usernameText = document.createElement('span');
-            usernameText.innerText = username;
-
-            // Append elements
-            chatItem.appendChild(profilePic);
-            chatItem.appendChild(usernameText);
-            recentChatsArea.appendChild(chatItem);
-
-            // Track the most recent user (first one in the list)
-            if (!mostRecentUserId) {
-                mostRecentUserId = user_id;
-                mostRecentUsername = username;
+        document.addEventListener('DOMContentLoaded', function() {
+            setupMobileView();
+            
+            if (currentRecipientId && window.innerWidth <= 768) {
+                showChatOnMobile();
             }
         });
 
-        // Reapply selection after reloading
-        updateSelectedChat();
-        
-        if (searchInput) {
-            searchRecentUsers();
-        }
-        
-        // Open the selected chat instead of the most recent one
-        if (firstLoad) {
-            if (selectedUserId && recentChats.some(chat => chat.user_id === selectedUserId)) {
-                const selectedChat = recentChats.find(chat => chat.user_id === selectedUserId);
-                startChat(selectedChat.user_id, selectedChat.username);
-            }
-            firstLoad = false; // Prevent reopening chat on future updates
-        }
-    } catch (error) {
-        console.error("Error fetching recent chats:", error);
-    }
-}
-
-// Function to update selected chat after list reload
-function updateSelectedChat() {
-    let selectedUserId = localStorage.getItem("selectedUserId");
-    if (selectedUserId) {
-        let selectedChat = document.querySelector(`#recent-chats li[data-user-id="${selectedUserId}"]`);
-        if (selectedChat) {
-            document.querySelectorAll("#recent-chats li").forEach(li => li.classList.remove("selected"));
-            selectedChat.classList.add("selected");
-        }
-    }
-}
-localStorage.removeItem("selectedUserId");
-
-// Call the function every 1 seconds to check for updates
-setInterval(fetchRecentChats, 1000);
-
-// Initial load
-window.onload = fetchRecentChats;
-
-
-
-////////////////////////////////////////////////////////////////////
-function updateRecentChats(newChat) {
-    const chatList = document.getElementById('recent-chats-list');
-    const newChatItem = document.createElement('li');
-    newChatItem.className = 'chat-item';
-    newChatItem.setAttribute('data-user-id', newChat.user_id);
-    newChatItem.innerText = `${newChat.username} - ${newChat.timestamp}`;
-
-    // Insert at the top of the list
-    chatList.insertBefore(newChatItem, chatList.firstChild);
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////SEARCH///
-function searchUsers() {
-    const searchQuery = document.getElementById('user-search').value.toLowerCase(); // Get the search input
-    const userList = document.getElementById('user-list');
-    const users = userList.getElementsByTagName('li'); // Get all user list items
-
-    // Loop through all user list items and filter based on the input
-    Array.from(users).forEach(user => {
-        const username = user.innerText.toLowerCase(); // Get the username of the current list item
-        if (username.includes(searchQuery)) {
-            user.style.display = ''; // Show the user if the username matches the search query
-        } else {
-            user.style.display = 'none'; // Hide the user if it doesn't match
-        }
-    });
-}
-
-function searchRecentUsers() {
-    let input = document.getElementById("recent-user-search").value.toLowerCase();
-    let chatList = document.getElementById("recent-chats");
-    let users = chatList.getElementsByTagName("li");
-
-    for (let user of users) {
-        let username = user.textContent || user.innerText;
-        if (username.toLowerCase().includes(input)) {
-            user.style.display = ""; // Show the user if it matches
-        } else {
-            user.style.display = "none"; // Hide the user if it doesn't match
-        }
-    }
-}
-
-////////////////////////////////////////CLEAR CHAT//////////////////////////////////////
-document.getElementById('clear-chat').addEventListener('click', function() {
-    // Assuming you have access to the current recipient's ID (you can store it when opening a conversation)
-    let recipientId = 123; // Replace with dynamic recipient ID
-
-    // Send a POST request to clear the chat
-    fetch('/clear_chat', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ recipient_id: recipientId })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Chat cleared successfully');
-            // Optionally, clear the chat UI or refresh the page to reflect the changes
-        } else {
-            alert('Failed to clear chat');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while clearing chat');
-    });
-});
-
-
-
-socket.on('chat_cleared', function(data) {
-    // Update the chat UI, possibly clearing messages or showing a notification
-    alert('Chat has been cleared!');
-    // You may also reset the chat box here if needed
-});
- ///////////////////////////////////////////////////////TYPING>>>>>>>>>>>>>>>>>>>>>>>>>/////
-document.getElementById('TxtMessage').addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        document.getElementById("send-button").click();
-    }
-});
-///////////////////////////////////USERS SORT/////////////////////////////
-// Assuming 'users' is an array of user objects with a 'username' field
-function sortUsers(users) {
-    return users.sort((a, b) => a.username.toLowerCase().localeCompare(b.username.toLowerCase()));
-}
-
-// Function to display users in the UI
-function displayUsers(users) {
-    const userList = document.getElementById('user-list'); // Ensure this matches your HTML ID
-    userList.innerHTML = ''; // Clear existing list
-
-    users.forEach(user => {
-        const listItem = document.createElement('li');
-        listItem.textContent = user.username;
-        userList.appendChild(listItem);
-    });
-}
-fetch('/api/get_users')  // Change this to your actual API route
-    .then(response => response.json())
-    .then(users => {
-        const sortedUsers = sortUsers(users);
-        displayUsers(sortedUsers);
-    })
-    .catch(error => console.error('Error fetching users:', error));
-//////////////////////////////////////////////////////////////////////////////////////Online status/////////////////////////////
-
-
-socket.on("user_online", (data) => {
-    if (data.user_id === currentRecipientId) {
-        updateStatusElement(data.user_id, true);
-    }
-});
-
-socket.on("user_offline", (data) => {
-    if (data.user_id === currentRecipientId) {
-        updateStatusElement(data.user_id, false);
-    }
-});
-////////////////////////////////////////////////////////////////////////
-async function fetchCurrentUser() {
-    try {
-        const response = await fetch('/get_current_user');
-        const data = await response.json();
-
-        if (data.error) {
-            console.error('Error:', data.error);
-            return;
-        }
-
-        // ✅ Update profile UI
-        document.getElementById('current-username').innerText = data.username;
-        document.getElementById('current-profile-picture').src = data.profile_picture;
-    } catch (error) {
-        console.error('Failed to fetch current user:', error);
-    }
-}
-
-
-
-
-// Close dropdowns when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.msg-delete-btn') && !e.target.closest('.delete-dropdown')) {
-        document.querySelectorAll('.delete-dropdown').forEach(dropdown => {
-            dropdown.classList.remove('show');
+        // Initial load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchRecentChats();
         });
-    }
-});
-
-
-// Call this function on page load
-window.onload = fetchCurrentUser;
-
-</script>
+    </script>
 </body>
 </html>
