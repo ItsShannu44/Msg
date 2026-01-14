@@ -171,18 +171,126 @@
                         <p id="profile-details">Select User</p>
                     </div>
                 </div>
-                <div class="detail-changes">    
-                    <input type="text" id="conversation-search" placeholder="Search in Conversation">
-                    <div class="detail-change">
-                        <p>Customize Theme</p>
-                        <div class="colors">
-                            <div class="color blue selected" data-color="blue"></div>
-                            <div class="color purple" data-color="purple"></div>
-                            <div class="color green" data-color="green"></div>
-                            <div class="color orange" data-color="orange"></div>
+                <div class="detail-change">
+                    <p>Customize Theme</p>
+                    <div class="colors">
+                        <div class="color blue selected" data-color="blue" data-theme="primary"></div>
+                        <div class="color purple" data-color="purple" data-theme="primary"></div>
+                        <div class="color green" data-color="green" data-theme="primary"></div>
+                        <div class="color orange" data-color="orange" data-theme="primary"></div>
+                    </div>
+                    <div class="theme-settings-expand" id="themeSettingsExpand">
+                        <i class="fas fa-chevron-down"></i> More Settings
+                    </div>
+                </div>
+
+                <div class="theme-settings-panel" id="themeSettingsPanel">
+                    <div class="theme-section">
+                        <h4>Chat Background</h4>
+                        <div class="background-options">
+                            <div class="bg-option selected" data-bg="pattern1" data-bg-url="/static/Pattern_1.png">
+                                <div class="bg-preview" style="background-image: url('/static/Pattern_1.png')"></div>
+                                <span>Pattern 1</span>
+                            </div>
+                            <div class="bg-option" data-bg="pattern2" data-bg-url="/static/Pattern_2.png">
+                                <div class="bg-preview" style="background-image: url('/static/Pattern_2.png')"></div>
+                                <span>Pattern 2</span>
+                            </div>
+                            <div class="bg-option" data-bg="solid" data-bg-color="var(--theme-bg-color)">
+                                <div class="bg-preview" style="background: var(--theme-bg-color)"></div>
+                                <span>Solid Color</span>
+                            </div>
+                            <div class="bg-option" data-bg="gradient" data-bg-gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                                <div class="bg-preview" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)"></div>
+                                <span>Gradient</span>
+                            </div>
+                            <div class="bg-option" data-bg="custom" id="customBgOption">
+                                <div class="bg-preview custom-bg">
+                                    <i class="fas fa-upload"></i>
+                                </div>
+                                <span>Custom Image</span>
+                                <input type="file" id="bgUpload" accept="image/*" style="display: none;">
+                            </div>
                         </div>
                     </div>
-                    <button id="refresh-profile">🔄 Refresh</button>
+                    
+                    <div class="theme-section">
+                        <h4>Message Colors</h4>
+                        <div class="color-options">
+                            <div class="color-option">
+                                <label>Sender Messages:</label>
+                                <input type="color" id="senderColor" value="#144890" class="color-picker">
+                            </div>
+                            <div class="color-option">
+                                <label>Receiver Messages:</label>
+                                <input type="color" id="receiverColor" value="#dfdfdf" class="color-picker">
+                            </div>
+                            <div class="color-option">
+                                <label>Text Color:</label>
+                                <input type="color" id="textColor" value="#000000" class="color-picker">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="theme-section">
+                        <h4>Chat Bubbles Style</h4>
+                        <div class="bubble-style-options">
+                            <div class="bubble-option selected" data-bubble="rounded">
+                                <div class="bubble-preview rounded"></div>
+                                <span>Rounded</span>
+                            </div>
+                            <div class="bubble-option" data-bubble="sharp">
+                                <div class="bubble-preview sharp"></div>
+                                <span>Sharp</span>
+                            </div>
+                            <div class="bubble-option" data-bubble="modern">
+                                <div class="bubble-preview modern"></div>
+                                <span>Modern</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="theme-section">
+                        <h4>Message Spacing</h4>
+                        <div class="slider-container">
+                            <label>Spacing between messages:</label>
+                            <input type="range" id="messageSpacing" min="5" max="30" value="10" class="spacing-slider">
+                            <span id="spacingValue">10px</span>
+                        </div>
+                    </div>
+                    
+                    <div class="theme-section">
+                        <h4>Font Settings</h4>
+                        <div class="font-options">
+                            <div class="font-option">
+                                <label>Font Family:</label>
+                                <select id="fontFamily" class="font-select">
+                                    <option value="Manrope, sans-serif">Manrope</option>
+                                    <option value="Roboto, sans-serif">Roboto</option>
+                                    <option value="Open Sans, sans-serif">Open Sans</option>
+                                    <option value="Poppins, sans-serif">Poppins</option>
+                                    <option value="Montserrat, sans-serif">Montserrat</option>
+                                </select>
+                            </div>
+                            <div class="font-option">
+                                <label>Font Size:</label>
+                                <select id="fontSize" class="font-select">
+                                    <option value="14px">Small</option>
+                                    <option value="16px" selected>Medium</option>
+                                    <option value="18px">Large</option>
+                                    <option value="20px">Extra Large</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+    
+                    <div class="theme-actions">
+                        <button id="resetTheme" class="theme-btn reset-btn">Reset to Default</button>
+                        <button id="saveTheme" class="theme-btn save-btn">Save Theme</button>
+                        <button id="exportTheme" class="theme-btn export-btn">Export Theme</button>
+                        <button id="importTheme" class="theme-btn import-btn">Import Theme</button>
+                        <input type="file" id="themeImportFile" accept=".json" style="display: none;">
+                    </div>
                 </div>
             </div>
         </div>
