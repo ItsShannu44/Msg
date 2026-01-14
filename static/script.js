@@ -84,7 +84,24 @@ if (!SpeechRecognition) {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const toggleButton = document.querySelector('.dark-light');
-const colors = document.querySelectorAll('.color');
+if (toggleButton) {
+    const originalToggle = toggleButton.onclick;
+    toggleButton.onclick = function() {
+        if (originalToggle) originalToggle();
+        themeSettings.darkMode = document.body.classList.contains('dark-mode');
+        saveThemeSettings();
+    };
+}
+
+const colors = document.querySelectorAll('.color[data-theme="primary"]');
+colors.forEach(color => {
+    const originalClick = color.onclick;
+    color.onclick = function() {
+        if (originalClick) originalClick();
+        themeSettings.primaryColor = this.getAttribute('data-color');
+        saveThemeSettings();
+    };
+});
 
 // Load saved theme from localStorage
 document.addEventListener('DOMContentLoaded', () => {
@@ -862,3 +879,436 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
+//============================ADVANCED THEME CUSTOMIZATION======================
+
+/* ================= ADVANCED THEME CUSTOMIZATION ================= */
+
+// Theme settings state
+let themeSettings = {
+    primaryColor: 'blue',
+    chatBackground: {
+        type: 'pattern1',
+        url: '/static/Pattern_1.png',
+        color: '',
+        gradient: ''
+    },
+    messageColors: {
+        sender: '#144890',
+        receiver: '#dfdfdf',
+        text: '#000000'
+    },
+    bubbleStyle: 'rounded',
+    messageSpacing: 10,
+    fontSettings: {
+        family: 'Manrope, sans-serif',
+        size: '16px'
+    },
+    darkMode: false
+};
+
+// Initialize theme settings panel
+document.addEventListener('DOMContentLoaded', function() {
+    const themeSettingsExpand = document.getElementById('themeSettingsExpand');
+    const themeSettingsPanel = document.getElementById('themeSettingsPanel');
+    const bgOptions = document.querySelectorAll('.bg-option');
+    const bubbleOptions = document.querySelectorAll('.bubble-option');
+    const colorPickers = document.querySelectorAll('.color-picker');
+    const messageSpacingSlider = document.getElementById('messageSpacing');
+    const spacingValue = document.getElementById('spacingValue');
+    const fontFamilySelect = document.getElementById('fontFamily');
+    const fontSizeSelect = document.getElementById('fontSize');
+    const customBgOption = document.getElementById('customBgOption');
+    const bgUpload = document.getElementById('bgUpload');
+    const resetThemeBtn = document.getElementById('resetTheme');
+    const saveThemeBtn = document.getElementById('saveTheme');
+    const exportThemeBtn = document.getElementById('exportTheme');
+    const importThemeBtn = document.getElementById('importTheme');
+    const themeImportFile = document.getElementById('themeImportFile');
+
+    // Load saved theme from localStorage
+    loadThemeSettings();
+
+    // Toggle theme settings panel
+    if (themeSettingsExpand && themeSettingsPanel) {
+        themeSettingsExpand.addEventListener('click', function() {
+            themeSettingsPanel.classList.toggle('expanded');
+            const icon = this.querySelector('i');
+            if (themeSettingsPanel.classList.contains('expanded')) {
+                icon.className = 'fas fa-chevron-up';
+                this.innerHTML = '<i class="fas fa-chevron-up"></i> Less Settings';
+            } else {
+                icon.className = 'fas fa-chevron-down';
+                this.innerHTML = '<i class="fas fa-chevron-down"></i> More Settings';
+            }
+        });
+    }
+
+    // Background selection
+    bgOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            bgOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            const bgType = this.dataset.bg;
+            themeSettings.chatBackground.type = bgType;
+            
+            // Update CSS variables based on background type
+            if (bgType === 'solid') {
+                document.documentElement.style.setProperty('--chat-bg-image', 'none');
+                document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
+                document.documentElement.style.setProperty('--chat-bg-color', this.dataset.bgColor);
+            } else if (bgType === 'gradient') {
+                document.documentElement.style.setProperty('--chat-bg-image', 'none');
+                document.documentElement.style.setProperty('--chat-bg-gradient', this.dataset.bgGradient);
+                document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+            } else if (bgType === 'custom') {
+                // Handle custom image upload
+                bgUpload.click();
+            } else {
+                document.documentElement.style.setProperty('--chat-bg-image', `url('${this.dataset.bgUrl}')`);
+                document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
+                document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+            }
+            
+            saveThemeSettings();
+        });
+    });
+
+    // Custom background upload
+    if (bgUpload) {
+        bgUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const bgUrl = e.target.result;
+                    document.documentElement.style.setProperty('--chat-bg-image', `url('${bgUrl}')`);
+                    document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
+                    document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+                    
+                    // Update custom bg preview
+                    const customPreview = customBgOption.querySelector('.bg-preview');
+                    customPreview.style.backgroundImage = `url('${bgUrl}')`;
+                    customPreview.innerHTML = '';
+                    
+                    themeSettings.chatBackground.url = bgUrl;
+                    saveThemeSettings();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // Color pickers
+    colorPickers.forEach(picker => {
+        picker.addEventListener('input', function() {
+            const color = this.value;
+            const id = this.id;
+            
+            if (id === 'senderColor') {
+                document.documentElement.style.setProperty('--sender-bubble-color', color);
+                themeSettings.messageColors.sender = color;
+            } else if (id === 'receiverColor') {
+                document.documentElement.style.setProperty('--receiver-bubble-color', color);
+                themeSettings.messageColors.receiver = color;
+            } else if (id === 'textColor') {
+                document.documentElement.style.setProperty('--message-text-color', color);
+                themeSettings.messageColors.text = color;
+            }
+            
+            saveThemeSettings();
+        });
+    });
+
+    // Bubble style selection
+    bubbleOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            bubbleOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            
+            const style = this.dataset.bubble;
+            themeSettings.bubbleStyle = style;
+            
+            // Update CSS variables for bubble styles
+            if (style === 'rounded') {
+                document.documentElement.style.setProperty('--bubble-border-radius', '20px 20px 0px 20px');
+                document.documentElement.style.setProperty('--receiver-bubble-radius', '0px 20px 20px 20px');
+            } else if (style === 'sharp') {
+                document.documentElement.style.setProperty('--bubble-border-radius', '5px 5px 0px 5px');
+                document.documentElement.style.setProperty('--receiver-bubble-radius', '0px 5px 5px 5px');
+            } else if (style === 'modern') {
+                document.documentElement.style.setProperty('--bubble-border-radius', '20px 5px 20px 20px');
+                document.documentElement.style.setProperty('--receiver-bubble-radius', '5px 20px 20px 5px');
+            }
+            
+            saveThemeSettings();
+        });
+    });
+
+    // Message spacing slider
+    if (messageSpacingSlider && spacingValue) {
+        messageSpacingSlider.addEventListener('input', function() {
+            const value = this.value + 'px';
+            spacingValue.textContent = value;
+            document.documentElement.style.setProperty('--message-spacing', value);
+            themeSettings.messageSpacing = parseInt(this.value);
+            saveThemeSettings();
+        });
+    }
+
+    // Font family selection
+    if (fontFamilySelect) {
+        fontFamilySelect.addEventListener('change', function() {
+            const fontFamily = this.value;
+            document.documentElement.style.setProperty('--selected-font-family', fontFamily);
+            themeSettings.fontSettings.family = fontFamily;
+            saveThemeSettings();
+        });
+    }
+
+    // Font size selection
+    if (fontSizeSelect) {
+        fontSizeSelect.addEventListener('change', function() {
+            const fontSize = this.value;
+            document.documentElement.style.setProperty('--selected-font-size', fontSize);
+            themeSettings.fontSettings.size = fontSize;
+            saveThemeSettings();
+        });
+    }
+
+    // Reset theme to default
+    if (resetThemeBtn) {
+        resetThemeBtn.addEventListener('click', function() {
+            if (confirm('Reset all theme settings to default?')) {
+                resetThemeSettings();
+            }
+        });
+    }
+
+    // Save theme
+    if (saveThemeBtn) {
+        saveThemeBtn.addEventListener('click', function() {
+            saveThemeSettings();
+            alert('Theme settings saved successfully!');
+        });
+    }
+
+    // Export theme
+    if (exportThemeBtn) {
+        exportThemeBtn.addEventListener('click', function() {
+            exportThemeSettings();
+        });
+    }
+
+    // Import theme
+    if (importThemeBtn) {
+        importThemeBtn.addEventListener('click', function() {
+            themeImportFile.click();
+        });
+    }
+
+    if (themeImportFile) {
+        themeImportFile.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const importedTheme = JSON.parse(e.target.result);
+                        applyImportedTheme(importedTheme);
+                        saveThemeSettings();
+                        alert('Theme imported successfully!');
+                    } catch (error) {
+                        alert('Error importing theme. Invalid file format.');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+    }
+});
+
+// Load theme settings from localStorage
+function loadThemeSettings() {
+    const savedTheme = localStorage.getItem('chatThemeSettings');
+    if (savedTheme) {
+        try {
+            themeSettings = JSON.parse(savedTheme);
+            applyThemeSettings();
+            updateUIFromSettings();
+        } catch (error) {
+            console.error('Error loading theme settings:', error);
+        }
+    }
+}
+
+// Apply theme settings to CSS variables
+function applyThemeSettings() {
+    // Apply primary theme color
+    document.body.setAttribute('data-theme', themeSettings.primaryColor);
+    
+    // Apply chat background
+    const bg = themeSettings.chatBackground;
+    if (bg.type === 'solid') {
+        document.documentElement.style.setProperty('--chat-bg-image', 'none');
+        document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
+        document.documentElement.style.setProperty('--chat-bg-color', bg.color || 'var(--theme-bg-color)');
+    } else if (bg.type === 'gradient') {
+        document.documentElement.style.setProperty('--chat-bg-image', 'none');
+        document.documentElement.style.setProperty('--chat-bg-gradient', bg.gradient);
+        document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+    } else if (bg.type === 'custom') {
+        document.documentElement.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
+        document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
+        document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+    } else {
+        document.documentElement.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
+        document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
+        document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+    }
+    
+    // Apply message colors
+    const colors = themeSettings.messageColors;
+    document.documentElement.style.setProperty('--sender-bubble-color', colors.sender);
+    document.documentElement.style.setProperty('--receiver-bubble-color', colors.receiver);
+    document.documentElement.style.setProperty('--message-text-color', colors.text);
+    
+    // Apply bubble style
+    const style = themeSettings.bubbleStyle;
+    if (style === 'rounded') {
+        document.documentElement.style.setProperty('--bubble-border-radius', '20px 20px 0px 20px');
+        document.documentElement.style.setProperty('--receiver-bubble-radius', '0px 20px 20px 20px');
+    } else if (style === 'sharp') {
+        document.documentElement.style.setProperty('--bubble-border-radius', '5px 5px 0px 5px');
+        document.documentElement.style.setProperty('--receiver-bubble-radius', '0px 5px 5px 5px');
+    } else if (style === 'modern') {
+        document.documentElement.style.setProperty('--bubble-border-radius', '20px 5px 20px 20px');
+        document.documentElement.style.setProperty('--receiver-bubble-radius', '5px 20px 20px 5px');
+    }
+    
+    // Apply message spacing
+    document.documentElement.style.setProperty('--message-spacing', themeSettings.messageSpacing + 'px');
+    
+    // Apply font settings
+    document.documentElement.style.setProperty('--selected-font-family', themeSettings.fontSettings.family);
+    document.documentElement.style.setProperty('--selected-font-size', themeSettings.fontSettings.size);
+    
+    // Apply dark mode
+    if (themeSettings.darkMode) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+}
+
+// Update UI controls from settings
+function updateUIFromSettings() {
+    // Update color pickers
+    const senderColorPicker = document.getElementById('senderColor');
+    const receiverColorPicker = document.getElementById('receiverColor');
+    const textColorPicker = document.getElementById('textColor');
+    
+    if (senderColorPicker) senderColorPicker.value = themeSettings.messageColors.sender;
+    if (receiverColorPicker) receiverColorPicker.value = themeSettings.messageColors.receiver;
+    if (textColorPicker) textColorPicker.value = themeSettings.messageColors.text;
+    
+    // Update background selection
+    const bgOptions = document.querySelectorAll('.bg-option');
+    bgOptions.forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.bg === themeSettings.chatBackground.type) {
+            option.classList.add('selected');
+        }
+    });
+    
+    // Update bubble style selection
+    const bubbleOptions = document.querySelectorAll('.bubble-option');
+    bubbleOptions.forEach(option => {
+        option.classList.remove('selected');
+        if (option.dataset.bubble === themeSettings.bubbleStyle) {
+            option.classList.add('selected');
+        }
+    });
+    
+    // Update spacing slider
+    const spacingSlider = document.getElementById('messageSpacing');
+    const spacingValue = document.getElementById('spacingValue');
+    if (spacingSlider && spacingValue) {
+        spacingSlider.value = themeSettings.messageSpacing;
+        spacingValue.textContent = themeSettings.messageSpacing + 'px';
+    }
+    
+    // Update font selects
+    const fontFamilySelect = document.getElementById('fontFamily');
+    const fontSizeSelect = document.getElementById('fontSize');
+    if (fontFamilySelect) fontFamilySelect.value = themeSettings.fontSettings.family;
+    if (fontSizeSelect) fontSizeSelect.value = themeSettings.fontSettings.size;
+}
+
+// Save theme settings to localStorage
+function saveThemeSettings() {
+    localStorage.setItem('chatThemeSettings', JSON.stringify(themeSettings));
+}
+
+// Reset theme to default settings
+function resetThemeSettings() {
+    themeSettings = {
+        primaryColor: 'blue',
+        chatBackground: {
+            type: 'pattern1',
+            url: '/static/Pattern_1.png',
+            color: '',
+            gradient: ''
+        },
+        messageColors: {
+            sender: '#144890',
+            receiver: '#dfdfdf',
+            text: '#000000'
+        },
+        bubbleStyle: 'rounded',
+        messageSpacing: 10,
+        fontSettings: {
+            family: 'Manrope, sans-serif',
+            size: '16px'
+        },
+        darkMode: false
+    };
+    
+    applyThemeSettings();
+    updateUIFromSettings();
+    saveThemeSettings();
+    alert('Theme reset to default settings!');
+}
+
+// Export theme settings as JSON file
+function exportThemeSettings() {
+    const themeData = JSON.stringify(themeSettings, null, 2);
+    const blob = new Blob([themeData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `kwikchat-theme-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    alert('Theme exported successfully!');
+}
+
+// Apply imported theme settings
+function applyImportedTheme(importedTheme) {
+    // Merge imported theme with default structure
+    themeSettings = {
+        ...themeSettings,
+        ...importedTheme
+    };
+    
+    applyThemeSettings();
+    updateUIFromSettings();
+}
+
+
