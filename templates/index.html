@@ -215,6 +215,7 @@
         let currentRecipientId = {{ default_recipient_id if default_recipient_id else 'null' }};
         let currentUserId = {{ current_user.id }};
         let lastDate = '';
+        let currentChatUser = null; // Track which conversation is currently open
 
         window.onload = function () {
             let lastChatUserId = {{ last_chat_user_id if last_chat_user_id else 'null' }};
@@ -294,7 +295,7 @@
                     <img class="msg-profile-pic" src="${profilePicUrl}" alt="${sender}'s Profile">
                 </div>
             `;
-
+        
 
             conversationArea.appendChild(msgDiv);
 
@@ -302,6 +303,35 @@
                 conversationArea.scrollTop = conversationArea.scrollHeight;
             }, 100);
         }
+
+        socket.on('receive_message', (data) => {
+            // Check if the message is for the current user
+            if (data.recipient_id === currentUserId) {
+                // Check if this message is for the currently open conversation
+                const isForCurrentChat = (data.sender_id === currentRecipientId);
+                
+                if (isForCurrentChat) {
+                    // Message is for the currently open chat - display it
+                    addMessageToConversation(
+                        data.sender_id === currentUserId ? 'You' : data.sender_username, 
+                        data.message, 
+                        false,
+                        data.timestamp,
+                        data.sender_profile_picture,
+                        `/profile_picture/${data.sender_id}`,
+                        data.message_id,
+                        data.sender_id === currentUserId,
+                        false
+                    );
+                } else {
+                    // Message is for a different conversation - just update recent chats
+                    console.log('Message received for different conversation:', data.sender_id);
+                }
+                
+                // Always update recent chats when a new message arrives
+                fetchRecentChats();
+            }
+        });
 
         // Listen for deletion events from socket
         socket.on('message_deleted', function(data) {
@@ -332,23 +362,6 @@
             // Check if the user is the current recipient
             if (data.user_id === currentRecipientId) {
                 updateStatusElement(data.user_id, false);
-            }
-        });
-
-        socket.on('receive_message', (data) => {
-            if (data.recipient_id === currentUserId) {
-                addMessageToConversation(
-                    data.sender_id === currentUserId ? 'You' : data.sender_username, 
-                    data.message, 
-                    false,
-                    data.timestamp,
-                    data.sender_profile_picture,
-                    `/profile_picture/${data.sender_id}`,
-                    data.message_id,
-                    data.sender_id === currentUserId,
-                    false
-                );
-                fetchRecentChats();
             }
         });
 
@@ -390,6 +403,7 @@
 
         function startChat(recipientId, username) {
             currentRecipientId = recipientId;
+            currentChatUser = username; // Track which conversation is open
 
             // Update the chat header with the username
             document.getElementById('chat-with').innerText = username;
@@ -651,6 +665,7 @@
             });
             
             currentRecipientId = null;
+            currentChatUser = null;
             localStorage.removeItem("selectedUserId");
         }
 
