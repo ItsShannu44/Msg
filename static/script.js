@@ -103,7 +103,7 @@ let themeSettings = {
     bubbleStyle: 'rounded',
     messageSpacing: 10,
     fontSettings: {
-        family: 'Manrope, sans-serif',
+        family: "'Manrope', sans-serif",
         size: '16px'
     },
     darkMode: false
@@ -121,9 +121,6 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeAgreementModal();
     }
     
-    // Initialize theme system
-    initializeThemeSystem();
-    
     // Load theme settings
     loadThemeSettings();
     
@@ -134,9 +131,12 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeEventListeners();
     
     // Initialize message sending if needed
-    if (document.getElementById('sendButton')) {
+    if (document.getElementById('send-button')) {
         initializeMessageSending();
     }
+    
+    // Apply theme settings after DOM is fully loaded
+    setTimeout(applyThemeSettings, 50);
 });
 
 /* ================= THEME SYSTEM FUNCTIONS ================= */
@@ -155,10 +155,11 @@ function initializeThemeSystem() {
                 color.classList.add('selected');
             }
         });
+        themeSettings.primaryColor = savedTheme;
     }
 
     // Load dark mode setting
-    const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+    const isDarkMode = localStorage.getItem('darkMode') === 'true';
     if (isDarkMode) {
         document.body.classList.add('dark-mode');
         themeSettings.darkMode = true;
@@ -182,6 +183,7 @@ function initializeThemeSystem() {
             color.classList.add('selected');
             themeSettings.primaryColor = theme;
             saveThemeSettings();
+            updateThemeVariables();
         });
     });
 
@@ -190,7 +192,7 @@ function initializeThemeSystem() {
         toggleButton.addEventListener('click', () => {
             const isNowDark = !document.body.classList.contains('dark-mode');
             document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isNowDark ? 'enabled' : 'disabled');
+            localStorage.setItem('darkMode', isNowDark);
             themeSettings.darkMode = isNowDark;
             
             // Update icon
@@ -200,9 +202,7 @@ function initializeThemeSystem() {
             }
             
             saveThemeSettings();
-            
-            // Update CSS variables for dark mode
-            updateDarkModeCSS(isNowDark);
+            updateThemeVariables();
         });
     }
     
@@ -210,21 +210,53 @@ function initializeThemeSystem() {
     initializeAdvancedThemeSystem();
 }
 
-function updateDarkModeCSS(isDark) {
+function updateThemeVariables() {
     const root = document.documentElement;
-    if (isDark) {
-        root.style.setProperty('--theme-bg-color', '#1a1a2e');
-        root.style.setProperty('--theme-color', '#ffffff');
-        root.style.setProperty('--message-text-color', '#ffffff');
-        root.style.setProperty('--incoming-message-bg', '#2d2d44');
-        root.style.setProperty('--outgoing-message-bg', '#0d6efd');
-    } else {
-        root.style.setProperty('--theme-bg-color', getComputedStyle(root).getPropertyValue('--light-theme-bg') || '#fafafa');
-        root.style.setProperty('--theme-color', '#2c3e50');
-        root.style.setProperty('--message-text-color', '#000000');
-        root.style.setProperty('--incoming-message-bg', '#dfdfdf');
-        root.style.setProperty('--outgoing-message-bg', '#144890');
+    
+    // Apply bubble style
+    const bubbleStyle = themeSettings.bubbleStyle;
+    if (bubbleStyle === 'rounded') {
+        root.style.setProperty('--bubble-border-radius', '20px');
+        root.style.setProperty('--receiver-bubble-radius', '0px 20px 20px 20px');
+    } else if (bubbleStyle === 'sharp') {
+        root.style.setProperty('--bubble-border-radius', '5px');
+        root.style.setProperty('--receiver-bubble-radius', '0px 5px 5px 5px');
+    } else if (bubbleStyle === 'modern') {
+        root.style.setProperty('--bubble-border-radius', '20px 5px 20px 20px');
+        root.style.setProperty('--receiver-bubble-radius', '5px 20px 20px 5px');
     }
+    
+    // Apply message colors
+    root.style.setProperty('--sender-bubble-color', themeSettings.messageColors.sender);
+    root.style.setProperty('--receiver-bubble-color', themeSettings.messageColors.receiver);
+    root.style.setProperty('--message-text-color', themeSettings.messageColors.text);
+    
+    // Apply chat background
+    const bg = themeSettings.chatBackground;
+    if (bg.type === 'solid') {
+        root.style.setProperty('--chat-bg-image', 'none');
+        root.style.setProperty('--chat-bg-color', bg.color || 'var(--theme-bg-color)');
+        root.style.setProperty('--chat-bg-gradient', 'none');
+    } else if (bg.type === 'gradient') {
+        root.style.setProperty('--chat-bg-image', 'none');
+        root.style.setProperty('--chat-bg-gradient', bg.gradient);
+        root.style.setProperty('--chat-bg-color', 'transparent');
+    } else if (bg.type === 'custom') {
+        root.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
+        root.style.setProperty('--chat-bg-gradient', 'none');
+        root.style.setProperty('--chat-bg-color', 'transparent');
+    } else {
+        root.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
+        root.style.setProperty('--chat-bg-gradient', 'none');
+        root.style.setProperty('--chat-bg-color', 'transparent');
+    }
+    
+    // Apply message spacing
+    root.style.setProperty('--message-spacing', themeSettings.messageSpacing + 'px');
+    
+    // Apply font settings
+    root.style.setProperty('--selected-font-family', themeSettings.fontSettings.family);
+    root.style.setProperty('--selected-font-size', themeSettings.fontSettings.size);
 }
 
 function initializeAdvancedThemeSystem() {
@@ -235,21 +267,6 @@ function initializeAdvancedThemeSystem() {
         console.log('Theme settings elements not found');
         return;
     }
-
-    const bgOptions = document.querySelectorAll('.bg-option');
-    const bubbleOptions = document.querySelectorAll('.bubble-option');
-    const colorPickers = document.querySelectorAll('.color-picker');
-    const messageSpacingSlider = document.getElementById('messageSpacing');
-    const spacingValue = document.getElementById('spacingValue');
-    const fontFamilySelect = document.getElementById('fontFamily');
-    const fontSizeSelect = document.getElementById('fontSize');
-    const customBgOption = document.getElementById('customBgOption');
-    const bgUpload = document.getElementById('bgUpload');
-    const resetThemeBtn = document.getElementById('resetTheme');
-    const saveThemeBtn = document.getElementById('saveTheme');
-    const exportThemeBtn = document.getElementById('exportTheme');
-    const importThemeBtn = document.getElementById('importTheme');
-    const themeImportFile = document.getElementById('themeImportFile');
 
     // Toggle theme settings panel
     themeSettingsExpand.addEventListener('click', function() {
@@ -264,7 +281,8 @@ function initializeAdvancedThemeSystem() {
         }
     });
 
-    // Background selection
+    // Initialize background options
+    const bgOptions = document.querySelectorAll('.bg-option');
     bgOptions.forEach(option => {
         option.addEventListener('click', function() {
             bgOptions.forEach(opt => opt.classList.remove('selected'));
@@ -274,46 +292,56 @@ function initializeAdvancedThemeSystem() {
             themeSettings.chatBackground.type = bgType;
             
             if (bgType === 'solid') {
-                document.documentElement.style.setProperty('--chat-bg-image', 'none');
-                document.documentElement.style.setProperty('--chat-bg-color', this.dataset.bgColor || 'var(--theme-bg-color)');
+                themeSettings.chatBackground.url = '';
+                themeSettings.chatBackground.color = this.dataset.bgColor;
+                themeSettings.chatBackground.gradient = '';
             } else if (bgType === 'gradient') {
-                document.documentElement.style.setProperty('--chat-bg-image', 'none');
-                document.documentElement.style.setProperty('--chat-bg-gradient', this.dataset.bgGradient);
-                document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+                themeSettings.chatBackground.url = '';
+                themeSettings.chatBackground.color = '';
+                themeSettings.chatBackground.gradient = this.dataset.bgGradient;
             } else if (bgType === 'custom') {
-                if (bgUpload) bgUpload.click();
+                document.getElementById('bgUpload').click();
+                return;
             } else {
-                document.documentElement.style.setProperty('--chat-bg-image', `url('${this.dataset.bgUrl}')`);
-                document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
-                document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
+                themeSettings.chatBackground.url = this.dataset.bgUrl;
+                themeSettings.chatBackground.color = '';
+                themeSettings.chatBackground.gradient = '';
             }
             
+            updateThemeVariables();
             saveThemeSettings();
         });
     });
 
     // Custom background upload
-    if (bgUpload) {
+    const bgUpload = document.getElementById('bgUpload');
+    const customBgOption = document.getElementById('customBgOption');
+    
+    if (bgUpload && customBgOption) {
         bgUpload.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const bgUrl = e.target.result;
-                    document.documentElement.style.setProperty('--chat-bg-image', `url('${bgUrl}')`);
-                    document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
-                    document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
                     
-                    if (customBgOption) {
-                        const customPreview = customBgOption.querySelector('.bg-preview');
-                        if (customPreview) {
-                            customPreview.style.backgroundImage = `url('${bgUrl}')`;
-                            customPreview.innerHTML = '';
-                        }
+                    // Update custom preview
+                    const customPreview = customBgOption.querySelector('.bg-preview');
+                    if (customPreview) {
+                        customPreview.style.backgroundImage = `url('${bgUrl}')`;
+                        customPreview.innerHTML = '';
                     }
                     
-                    themeSettings.chatBackground.url = bgUrl;
+                    // Update theme settings
+                    bgOptions.forEach(opt => opt.classList.remove('selected'));
+                    customBgOption.classList.add('selected');
+                    
                     themeSettings.chatBackground.type = 'custom';
+                    themeSettings.chatBackground.url = bgUrl;
+                    themeSettings.chatBackground.color = '';
+                    themeSettings.chatBackground.gradient = '';
+                    
+                    updateThemeVariables();
                     saveThemeSettings();
                 };
                 reader.readAsDataURL(file);
@@ -322,27 +350,27 @@ function initializeAdvancedThemeSystem() {
     }
 
     // Color pickers
+    const colorPickers = document.querySelectorAll('.color-picker');
     colorPickers.forEach(picker => {
         picker.addEventListener('input', function() {
             const color = this.value;
             const id = this.id;
             
             if (id === 'senderColor') {
-                document.documentElement.style.setProperty('--sender-bubble-color', color);
                 themeSettings.messageColors.sender = color;
             } else if (id === 'receiverColor') {
-                document.documentElement.style.setProperty('--receiver-bubble-color', color);
                 themeSettings.messageColors.receiver = color;
             } else if (id === 'textColor') {
-                document.documentElement.style.setProperty('--message-text-color', color);
                 themeSettings.messageColors.text = color;
             }
             
+            updateThemeVariables();
             saveThemeSettings();
         });
     });
 
     // Bubble style selection
+    const bubbleOptions = document.querySelectorAll('.bubble-option');
     bubbleOptions.forEach(option => {
         option.addEventListener('click', function() {
             bubbleOptions.forEach(opt => opt.classList.remove('selected'));
@@ -351,50 +379,46 @@ function initializeAdvancedThemeSystem() {
             const style = this.dataset.bubble;
             themeSettings.bubbleStyle = style;
             
-            if (style === 'rounded') {
-                document.documentElement.style.setProperty('--bubble-border-radius', '20px');
-            } else if (style === 'sharp') {
-                document.documentElement.style.setProperty('--bubble-border-radius', '5px');
-            } else if (style === 'modern') {
-                document.documentElement.style.setProperty('--bubble-border-radius', '20px 5px 20px 20px');
-            }
-            
+            updateThemeVariables();
             saveThemeSettings();
         });
     });
 
     // Message spacing slider
+    const messageSpacingSlider = document.getElementById('messageSpacing');
+    const spacingValue = document.getElementById('spacingValue');
     if (messageSpacingSlider && spacingValue) {
         messageSpacingSlider.addEventListener('input', function() {
             const value = this.value + 'px';
             spacingValue.textContent = value;
-            document.documentElement.style.setProperty('--message-spacing', value);
             themeSettings.messageSpacing = parseInt(this.value);
+            updateThemeVariables();
             saveThemeSettings();
         });
     }
 
     // Font family selection
+    const fontFamilySelect = document.getElementById('fontFamily');
     if (fontFamilySelect) {
         fontFamilySelect.addEventListener('change', function() {
-            const fontFamily = this.value;
-            document.documentElement.style.setProperty('--selected-font-family', fontFamily);
-            themeSettings.fontSettings.family = fontFamily;
+            themeSettings.fontSettings.family = this.value;
+            updateThemeVariables();
             saveThemeSettings();
         });
     }
 
     // Font size selection
+    const fontSizeSelect = document.getElementById('fontSize');
     if (fontSizeSelect) {
         fontSizeSelect.addEventListener('change', function() {
-            const fontSize = this.value;
-            document.documentElement.style.setProperty('--selected-font-size', fontSize);
-            themeSettings.fontSettings.size = fontSize;
+            themeSettings.fontSettings.size = this.value;
+            updateThemeVariables();
             saveThemeSettings();
         });
     }
 
     // Reset theme to default
+    const resetThemeBtn = document.getElementById('resetTheme');
     if (resetThemeBtn) {
         resetThemeBtn.addEventListener('click', function() {
             if (confirm('Reset all theme settings to default?')) {
@@ -404,6 +428,7 @@ function initializeAdvancedThemeSystem() {
     }
 
     // Save theme
+    const saveThemeBtn = document.getElementById('saveTheme');
     if (saveThemeBtn) {
         saveThemeBtn.addEventListener('click', function() {
             saveThemeSettings();
@@ -412,6 +437,7 @@ function initializeAdvancedThemeSystem() {
     }
 
     // Export theme
+    const exportThemeBtn = document.getElementById('exportTheme');
     if (exportThemeBtn) {
         exportThemeBtn.addEventListener('click', function() {
             exportThemeSettings();
@@ -419,6 +445,9 @@ function initializeAdvancedThemeSystem() {
     }
 
     // Import theme
+    const importThemeBtn = document.getElementById('importTheme');
+    const themeImportFile = document.getElementById('themeImportFile');
+    
     if (importThemeBtn) {
         importThemeBtn.addEventListener('click', function() {
             if (themeImportFile) themeImportFile.click();
@@ -450,9 +479,26 @@ function loadThemeSettings() {
     const savedTheme = localStorage.getItem('chatThemeSettings');
     if (savedTheme) {
         try {
-            themeSettings = JSON.parse(savedTheme);
-            applyThemeSettings();
-            updateUIFromSettings();
+            const parsed = JSON.parse(savedTheme);
+            // Merge with default settings
+            themeSettings = {
+                ...themeSettings,
+                ...parsed,
+                chatBackground: {
+                    ...themeSettings.chatBackground,
+                    ...parsed.chatBackground
+                },
+                messageColors: {
+                    ...themeSettings.messageColors,
+                    ...parsed.messageColors
+                },
+                fontSettings: {
+                    ...themeSettings.fontSettings,
+                    ...parsed.fontSettings
+                }
+            };
+            
+            console.log('Loaded theme settings:', themeSettings);
         } catch (error) {
             console.error('Error loading theme settings:', error);
         }
@@ -460,58 +506,31 @@ function loadThemeSettings() {
 }
 
 function applyThemeSettings() {
+    console.log('Applying theme settings...', themeSettings);
+    
     // Apply primary theme color
     document.body.setAttribute('data-theme', themeSettings.primaryColor);
-    
-    // Apply chat background
-    const bg = themeSettings.chatBackground;
-    if (bg.type === 'solid') {
-        document.documentElement.style.setProperty('--chat-bg-image', 'none');
-        document.documentElement.style.setProperty('--chat-bg-color', bg.color || 'var(--theme-bg-color)');
-    } else if (bg.type === 'gradient') {
-        document.documentElement.style.setProperty('--chat-bg-image', 'none');
-        document.documentElement.style.setProperty('--chat-bg-gradient', bg.gradient || 'none');
-        document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
-    } else if (bg.type === 'custom') {
-        document.documentElement.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
-        document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
-        document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
-    } else {
-        document.documentElement.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
-        document.documentElement.style.setProperty('--chat-bg-gradient', 'none');
-        document.documentElement.style.setProperty('--chat-bg-color', 'transparent');
-    }
-    
-    // Apply message colors
-    const colors = themeSettings.messageColors;
-    document.documentElement.style.setProperty('--sender-bubble-color', colors.sender);
-    document.documentElement.style.setProperty('--receiver-bubble-color', colors.receiver);
-    document.documentElement.style.setProperty('--message-text-color', colors.text);
-    
-    // Apply bubble style
-    const style = themeSettings.bubbleStyle;
-    if (style === 'rounded') {
-        document.documentElement.style.setProperty('--bubble-border-radius', '20px');
-    } else if (style === 'sharp') {
-        document.documentElement.style.setProperty('--bubble-border-radius', '5px');
-    } else if (style === 'modern') {
-        document.documentElement.style.setProperty('--bubble-border-radius', '20px 5px 20px 20px');
-    }
-    
-    // Apply message spacing
-    document.documentElement.style.setProperty('--message-spacing', themeSettings.messageSpacing + 'px');
-    
-    // Apply font settings
-    document.documentElement.style.setProperty('--selected-font-family', themeSettings.fontSettings.family);
-    document.documentElement.style.setProperty('--selected-font-size', themeSettings.fontSettings.size);
     
     // Apply dark mode
     if (themeSettings.darkMode) {
         document.body.classList.add('dark-mode');
-        updateDarkModeCSS(true);
     } else {
         document.body.classList.remove('dark-mode');
-        updateDarkModeCSS(false);
+    }
+    
+    // Update UI from settings
+    updateUIFromSettings();
+    
+    // Update CSS variables
+    updateThemeVariables();
+    
+    // Force a re-render of conversation area to apply background
+    const conversationArea = document.getElementById('conversation-area');
+    if (conversationArea) {
+        conversationArea.style.backgroundImage = 'none';
+        setTimeout(() => {
+            updateThemeVariables();
+        }, 10);
     }
 }
 
@@ -531,6 +550,15 @@ function updateUIFromSettings() {
         option.classList.remove('selected');
         if (option.dataset.bg === themeSettings.chatBackground.type) {
             option.classList.add('selected');
+            
+            // Update custom preview if needed
+            if (option.dataset.bg === 'custom') {
+                const customPreview = option.querySelector('.bg-preview');
+                if (customPreview && themeSettings.chatBackground.url) {
+                    customPreview.style.backgroundImage = `url('${themeSettings.chatBackground.url}')`;
+                    customPreview.innerHTML = '';
+                }
+            }
         }
     });
     
@@ -556,10 +584,20 @@ function updateUIFromSettings() {
     const fontSizeSelect = document.getElementById('fontSize');
     if (fontFamilySelect) fontFamilySelect.value = themeSettings.fontSettings.family;
     if (fontSizeSelect) fontSizeSelect.value = themeSettings.fontSettings.size;
+    
+    // Update theme color selection
+    const colors = document.querySelectorAll('.color[data-theme="primary"]');
+    colors.forEach(color => {
+        color.classList.remove('selected');
+        if (color.getAttribute('data-color') === themeSettings.primaryColor) {
+            color.classList.add('selected');
+        }
+    });
 }
 
 function saveThemeSettings() {
     localStorage.setItem('chatThemeSettings', JSON.stringify(themeSettings));
+    console.log('Theme settings saved:', themeSettings);
 }
 
 function resetThemeSettings() {
@@ -579,16 +617,23 @@ function resetThemeSettings() {
         bubbleStyle: 'rounded',
         messageSpacing: 10,
         fontSettings: {
-            family: 'Manrope, sans-serif',
+            family: "'Manrope', sans-serif",
             size: '16px'
         },
-        darkMode: document.body.classList.contains('dark-mode')
+        darkMode: false
     };
+    
+    // Clear localStorage
+    localStorage.removeItem('chatThemeSettings');
+    localStorage.removeItem('themeColor');
+    localStorage.setItem('darkMode', 'false');
     
     applyThemeSettings();
     updateUIFromSettings();
     saveThemeSettings();
+    
     alert('Theme reset to default settings!');
+    location.reload();
 }
 
 function exportThemeSettings() {
@@ -610,11 +655,24 @@ function exportThemeSettings() {
 function applyImportedTheme(importedTheme) {
     themeSettings = {
         ...themeSettings,
-        ...importedTheme
+        ...importedTheme,
+        chatBackground: {
+            ...themeSettings.chatBackground,
+            ...importedTheme.chatBackground
+        },
+        messageColors: {
+            ...themeSettings.messageColors,
+            ...importedTheme.messageColors
+        },
+        fontSettings: {
+            ...themeSettings.fontSettings,
+            ...importedTheme.fontSettings
+        }
     };
     
     applyThemeSettings();
     updateUIFromSettings();
+    saveThemeSettings();
 }
 
 /* ================= SELECTION SYSTEM FUNCTIONS ================= */
@@ -753,7 +811,7 @@ async function deleteSelectedMessages(deleteType) {
 /* ================= EVENT LISTENERS INITIALIZATION ================= */
 
 function initializeEventListeners() {
-    // Add button toggle - FIXED: Your HTML doesn't have these exact IDs
+    // Add button toggle
     const addButton = document.getElementById("addtoggleButton");
     const recentsArea = document.querySelector(".msg-detail");
     const registeredUsers = document.querySelector(".registeredusers");
@@ -1062,5 +1120,8 @@ function initializeAgreementModal() {
 window.toggleSelection = toggleSelection;
 window.clearSelection = clearSelection;
 window.deleteSelectedMessages = deleteSelectedMessages;
+window.loadThemeSettings = loadThemeSettings;
+window.applyThemeSettings = applyThemeSettings;
+window.saveThemeSettings = saveThemeSettings;
 
-console.log('KwikChat JavaScript loaded successfully!')
+console.log('KwikChat JavaScript loaded successfully!');
