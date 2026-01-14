@@ -46,24 +46,47 @@
   rgba(255, 255, 255, 1) 78%,
   rgba(255, 255, 255, 0) 100%
  );
+ 
+ /* ADDED: Theme system variables for JavaScript to work */
+ --sender-bubble-color: #144890;
+ --receiver-bubble-color: #dfdfdf;
+ --message-text-color: #000000;
+ --chat-bg-image: url('/static/Pattern_1.png');
+ --chat-bg-color: var(--theme-bg-color);
+ --chat-bg-gradient: none;
+ --bubble-border-radius: 20px 20px 0px 20px;
+ --receiver-bubble-radius: 0px 20px 20px 20px;
+ --message-spacing: 10px;
+ --selected-font-family: 'Manrope', sans-serif;
+ --selected-font-size: 16px;
+ --font-family-selected: 'Manrope', sans-serif;
 }
 
 [data-theme="purple"] {
  --theme-color: #8357dc;
  --button-color:  #8357dc;
  --button-bg-color: rgba(159, 122, 234, 0.12);
+ 
+ /* ADDED: Theme-specific bubble colors */
+ --sender-bubble-color: #8357dc;
 }
 
 [data-theme="green"] {
  --theme-color: #149086;
  --button-color: #149086;
  --button-bg-color: rgba(56, 178, 171, 0.15);
+ 
+ /* ADDED: Theme-specific bubble colors */
+ --sender-bubble-color: #149086;
 }
 
 [data-theme="orange"] {
  --theme-color: #a65621;
  --button-color: #a65621;
  --button-bg-color: rgba(237, 137, 54, 0.12);
+ 
+ /* ADDED: Theme-specific bubble colors */
+ --sender-bubble-color: #a65621;
 }
 
 .dark-mode {
@@ -109,6 +132,37 @@
  --detail-font-color: var(--input-chat-color);
  --conversation-bg:url('/static/Pattern_0.png');
  --datetime-color:rgb(233, 233, 233);
+ 
+ /* ADDED: Dark mode theme variables */
+ --sender-bubble-color: var(--theme-color);
+ --receiver-bubble-color: #716d6dd6;
+ --message-text-color: #ffffff;
+ --chat-bg-image: url('/static/Pattern_0.png');
+}
+
+/* ADDED: Bubble style classes for theme system */
+.bubble-style-rounded {
+    --bubble-border-radius: 20px 20px 0px 20px !important;
+    --receiver-bubble-radius: 0px 20px 20px 20px !important;
+}
+
+.bubble-style-sharp {
+    --bubble-border-radius: 5px 5px 0px 5px !important;
+    --receiver-bubble-radius: 0px 5px 5px 5px !important;
+}
+
+.bubble-style-modern {
+    --bubble-border-radius: 20px 5px 20px 20px !important;
+    --receiver-bubble-radius: 5px 20px 20px 5px !important;
+}
+
+/* ADDED: Apply bubble radius to messages */
+.sender {
+    border-radius: var(--bubble-border-radius) !important;
+}
+
+.receiver {
+    border-radius: var(--receiver-bubble-radius) !important;
 }
 
 .blue {
@@ -298,8 +352,6 @@ cursor: pointer;
     background: #777; 
 }
 
-
-
 .registeredusers::-webkit-scrollbar {
     width: 5px; 
 }
@@ -482,7 +534,7 @@ cursor: pointer;
 }
 
 .sender {
-    background-color:var(--theme-color);
+    background-color:var(--sender-bubble-color) !important; /* CHANGED: Use theme variable */
     color: white;
     font-weight: 600;
     word-wrap: break-word;
@@ -490,7 +542,6 @@ cursor: pointer;
     margin-left: auto; /* Push to the right */
     max-width: 300px;
     width:max-content;
-    border-radius: 20px 20px 0px 20px;
     height: auto;
     margin-bottom: 20px;
     overflow: hidden;
@@ -506,14 +557,13 @@ cursor: pointer;
 }
 
 .receiver {
-    background-color:var(--receivers-chat);
+    background-color:var(--receiver-bubble-color) !important; /* CHANGED: Use theme variable */
     color: var(--black-white);
     font-weight: 600;
     max-width: 300px;
     width:max-content;
     word-wrap: break-word;  
     align-self: flex-start; /* Align to the left */
-    border-radius: 0px 20px 20px 20px;
     margin-bottom: 20px;
     overflow: hidden;
     height: auto;
@@ -638,8 +688,12 @@ cursor: pointer;
     height:100%;
     overflow-y: auto;
     overflow-x: hidden;
-    background:var(--conversation-bg);
-    background-size: cover;
+    background-image: var(--chat-bg-image) !important; /* CHANGED: Use theme variable */
+    background-color: var(--chat-bg-color) !important; /* CHANGED: Use theme variable */
+    background: var(--chat-bg-gradient) !important; /* CHANGED: Use theme variable */
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
     padding: 20px;
 }
 /* Chrome, Edge, and Safari */
@@ -2204,37 +2258,13 @@ text-align: center;
     color: white;
 }
 
-/* Additional CSS Variables */
-:root {
-    /* New theme variables */
-    --sender-bubble-color: #144890;
-    --receiver-bubble-color: #dfdfdf;
-    --message-text-color: #000000;
-    --chat-bg-image: url('/static/Pattern_1.png');
-    --chat-bg-color: var(--theme-bg-color);
-    --chat-bg-gradient: none;
-    --bubble-border-radius: 20px 20px 0px 20px;
-    --receiver-bubble-radius: 0px 20px 20px 20px;
-    --message-spacing: 10px;
-    --selected-font-family: 'Manrope', sans-serif;
-    --selected-font-size: 16px;
-}
-
-.dark-mode {
-    --sender-bubble-color: var(--theme-color);
-    --receiver-bubble-color: #716d6dd6;
-    --message-text-color: #ffffff;
-}
-
-/* Apply bubble styles */
-.sender {
+/* ADDED: Apply theme variables to elements */
+.msg.sender {
     background-color: var(--sender-bubble-color) !important;
-    border-radius: var(--bubble-border-radius) !important;
 }
 
-.receiver {
+.msg.receiver {
     background-color: var(--receiver-bubble-color) !important;
-    border-radius: var(--receiver-bubble-radius) !important;
 }
 
 .msg-message {
@@ -2245,18 +2275,18 @@ text-align: center;
     background-image: var(--chat-bg-image) !important;
     background-color: var(--chat-bg-color) !important;
     background: var(--chat-bg-gradient) !important;
-    background-size: cover !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
 }
 
-/* Apply font settings */
+/* ADDED: Apply font settings */
 body, .msg-message, .msg-time {
     font-family: var(--selected-font-family) !important;
+}
+
+.msg-message, .msg-time {
     font-size: var(--selected-font-size) !important;
 }
 
-/* Message spacing */
+/* ADDED: Message spacing */
 .msg {
     margin-bottom: var(--message-spacing) !important;
 }
