@@ -91,6 +91,7 @@ def init_db():
         )
     ''')
 
+
     # Add timestamp_utc column
     cursor.execute("PRAGMA table_info(messages)")
     columns = [column[1] for column in cursor.fetchall()]
