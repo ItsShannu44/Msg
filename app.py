@@ -995,7 +995,7 @@ def delete_message():
             # Also mark as deleted for sender to avoid confusion
             cursor.execute('UPDATE messages SET deleted_for_sender = 1 WHERE id = ?', (message_id,))
             
-            # Emit to both users
+
             socketio.emit('message_deleted', {
                 'message_id': message_id, 
                 'delete_type': 'for_everyone'
