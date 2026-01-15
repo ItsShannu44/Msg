@@ -1,6 +1,7 @@
-/* ================= SPEECH RECOGNITION ================= */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (SpeechRecognition) {
+if (!SpeechRecognition) {
+    console.error("Speech Recognition API is not supported in this browser.");
+} else {
     console.log("Speech Recognition API is available.");
 
     const recognition = new SpeechRecognition();
@@ -16,10 +17,9 @@ if (SpeechRecognition) {
     recognition.onstart = () => {
         console.log("Voice recognition started...");
         txtMessage.placeholder = "Listening...";
-        if (startVoiceButton) startVoiceButton.textContent = "Stop Voice";
+        startVoiceButton.textContent = "Stop Voice";
 
-        const voiceAnimation = document.getElementById("voiceAnimation");
-        if (voiceAnimation) {
+        if (typeof voiceAnimation !== "undefined") {
             voiceAnimation.classList.add("active");
         }
 
@@ -30,10 +30,9 @@ if (SpeechRecognition) {
         console.error("Speech recognition error:", event.error);
         recognition.stop();
         isListening = false;
-        if (startVoiceButton) startVoiceButton.textContent = "Start Voice";
+        startVoiceButton.textContent = "Start Voice";
 
-        const voiceAnimation = document.getElementById("voiceAnimation");
-        if (voiceAnimation) {
+        if (typeof voiceAnimation !== "undefined") {
             voiceAnimation.classList.remove("active");
         }
 
@@ -64,637 +63,475 @@ if (SpeechRecognition) {
         console.log("Voice recognition stopped.");
         txtMessage.placeholder = "Type a message...";
         isListening = false;
-        if (startVoiceButton) startVoiceButton.textContent = "Start Voice";
+        startVoiceButton.textContent = "Start Voice";
 
-        const voiceAnimation = document.getElementById("voiceAnimation");
-        if (voiceAnimation) {
+        if (typeof voiceAnimation !== "undefined") {
             voiceAnimation.classList.remove("active");
         }
     };
 
-    if (startVoiceButton) {
-        startVoiceButton.addEventListener("click", () => {
-            if (isListening) {
-                recognition.stop();
-            } else {
-                recognition.start();
-                isListening = true;
-            }
-        });
-    }
-} else {
-    console.error("Speech Recognition API is not supported in this browser.");
+    startVoiceButton.addEventListener("click", () => {
+        if (isListening) {
+            recognition.stop();
+        } else {
+            recognition.start();
+            isListening = true;
+        }
+    });
 }
 
-/* ================= THEME SETTINGS STATE ================= */
-let themeSettings = {
-    primaryColor: 'blue',
-    chatBackground: {
-        type: 'pattern1',
-        url: '/static/Pattern_1.png',
-        color: '',
-        gradient: ''
-    },
-    messageColors: {
-        sender: '#144890',
-        receiver: '#dfdfdf',
-        text: '#000000'
-    },
-    bubbleStyle: 'rounded',
-    messageSpacing: 10,
-    fontSettings: {
-        family: "'Manrope', sans-serif",
-        size: '16px'
-    },
-    darkMode: false
-};
+//////////////////////////////////////////////////////////////////STYLES CSS DARK AND LIGHT MODE//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/* ================= BULK MESSAGE DELETION ================= */
-let selectedMessages = new Map();
-let selectionMode = false;
-const toolbar = document.getElementById("selection-toolbar");
+const toggleButton = document.querySelector('.dark-light');
+const colors = document.querySelectorAll('.color');
 
-/* ================= DOM CONTENT LOADED ================= */
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if user agreement modal exists and initialize it
-    if (document.getElementById('userAgreementModal')) {
-        initializeAgreementModal();
-    }
-    
-    // Load theme settings
-    loadThemeSettings();
-    
-    // Initialize selection system
-    initializeSelectionSystem();
-    
-    // Initialize other event listeners
-    initializeEventListeners();
-    
-    // Initialize message sending if needed
-    if (document.getElementById('send-button')) {
-        initializeMessageSending();
-    }
-    
-    // Apply theme settings after DOM is fully loaded
-    setTimeout(applyThemeSettings, 50);
-});
-
-/* ================= THEME SYSTEM FUNCTIONS ================= */
-
-function initializeThemeSystem() {
-    const toggleButton = document.querySelector('.dark-light');
-    const colors = document.querySelectorAll('.color[data-theme="primary"]');
-    
-    // Load saved theme from localStorage
+// Load saved theme from localStorage
+document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('themeColor');
     if (savedTheme) {
         document.body.setAttribute('data-theme', savedTheme);
+        
+        // Remove 'selected' from all and apply only to the saved theme
         colors.forEach(color => {
             color.classList.remove('selected'); 
             if (color.getAttribute('data-color') === savedTheme) {
-                color.classList.add('selected');
+                color.classList.add('selected'); // Only select the saved theme
             }
         });
-        themeSettings.primaryColor = savedTheme;
     }
 
-    // Load dark mode setting
-    const isDarkMode = localStorage.getItem('darkMode') === 'true';
+    const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
     if (isDarkMode) {
         document.body.classList.add('dark-mode');
-        themeSettings.darkMode = true;
+    }
+});
+
+// Event listener for theme selection
+colors.forEach(color => {
+    color.addEventListener('click', () => {
+        // Remove 'selected' from all before adding it to the clicked one
+        colors.forEach(c => c.classList.remove('selected'));
+
+        const theme = color.getAttribute('data-color');
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('themeColor', theme); // Save theme in localStorage
         
-        // Update dark-light toggle icon if it exists
-        if (toggleButton) {
-            const svg = toggleButton.querySelector('svg');
-            if (svg) {
-                svg.style.fill = 'white';
-            }
+        color.classList.add('selected'); // Add 'selected' to clicked color
+    });
+});
+
+// Event listener for dark/light mode toggle
+toggleButton.addEventListener('click', () => {
+    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode ? 'enabled' : 'disabled'); // Store dark mode preference
+});
+
+//////////////////////////////////////////////ADD DIV TOGGLE///////////
+document.addEventListener("DOMContentLoaded", function () {
+    const addButton = document.getElementById("addtoggleButton");
+    const recentsArea = document.querySelector(".msg-detail");
+    const registeredUsers = document.querySelector(".registeredusers");
+
+    addButton.addEventListener("click", function () {
+        this.classList.toggle("back"); // Toggle the back class for icon change
+
+        if (this.classList.contains("back")) {
+            recentsArea.style.display = "none";
+            registeredUsers.style.display = "flex"; 
+        } else {
+            registeredUsers.style.display = "none";
+            recentsArea.style.display = "block";  
+        }
+    });
+});
+
+
+////////////////////////SRCL Conversation
+document.addEventListener("DOMContentLoaded", function () {
+    const conversationArea = document.getElementById("conversation-area");
+    const scrollDownBtn = document.getElementById("scroll-down-btn");
+
+    // Scroll to bottom function
+    function scrollToBottom() {
+        conversationArea.scrollTo({
+            top: conversationArea.scrollHeight,
+            behavior: "smooth"
+        });
+    }
+    // Show/hide button based on scroll position
+    function toggleScrollButton() {
+        const isAtBottom = conversationArea.scrollHeight - conversationArea.scrollTop <= conversationArea.clientHeight + 10;
+        if (isAtBottom) {
+            scrollDownBtn.classList.remove("show"); // Hide button when already at the bottom
+        } else {
+            scrollDownBtn.classList.add("show"); // Show button when scrolled up
         }
     }
 
-    // Event listener for theme selection
-    colors.forEach(color => {
-        color.addEventListener('click', () => {
-            colors.forEach(c => c.classList.remove('selected'));
-            const theme = color.getAttribute('data-color');
-            document.body.setAttribute('data-theme', theme);
-            localStorage.setItem('themeColor', theme);
-            color.classList.add('selected');
-            themeSettings.primaryColor = theme;
-            saveThemeSettings();
-            updateThemeVariables();
-        });
+    // Scroll event listener
+    conversationArea.addEventListener("scroll", toggleScrollButton);
+
+    // Button click to scroll down
+    scrollDownBtn.addEventListener("click", scrollToBottom);
+
+});
+//////////////////////////////////////////////////////////////////////seacrch in conversation/////////////////////////////////
+
+document.getElementById('conversation-search').addEventListener('input', function () {
+    let searchQuery = this.value.toLowerCase();
+    let messages = document.querySelectorAll('#conversation-area .msg .msg-message');
+    let firstMatch = null;
+
+    messages.forEach(msg => {
+        let originalText = msg.textContent;
+        let lowerText = originalText.toLowerCase();
+
+        if (searchQuery && lowerText.includes(searchQuery)) {
+            // Highlight matching text
+            let highlightedText = originalText.replace(new RegExp(`(${searchQuery})`, 'gi'), 
+                `<span class="highlight">$1</span>`);
+            msg.innerHTML = highlightedText;
+
+            // Store the first matching element to scroll to
+            if (!firstMatch) {
+                firstMatch = msg;
+            }
+        } else {
+            // Restore original text if search is cleared
+            msg.innerHTML = originalText;
+        }
     });
 
-    // Event listener for dark/light mode toggle
-    if (toggleButton) {
-        toggleButton.addEventListener('click', () => {
-            const isNowDark = !document.body.classList.contains('dark-mode');
-            document.body.classList.toggle('dark-mode');
-            localStorage.setItem('darkMode', isNowDark);
-            themeSettings.darkMode = isNowDark;
-            
-            // Update icon
-            const svg = toggleButton.querySelector('svg');
-            if (svg) {
-                svg.style.fill = isNowDark ? 'white' : '';
+    // Scroll to the first match
+    if (firstMatch) {
+        firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+
+/////////////////////DELETE MSG//////////////////////////
+
+// Listen for the deleted message event
+if (typeof socket !== 'undefined') {
+    socket.on('message_deleted', function(data) {
+        const messageElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+        if (messageElement) {
+            // Update message display instead of removing
+            if (data.delete_type === 'for_everyone') {
+                messageElement.classList.add('deleted');
+                const msgContent = messageElement.querySelector('.msg-message');
+                if (msgContent) {
+                    msgContent.textContent = '[This message was deleted]';
+                }
+            } else if (data.delete_type === 'for_me' && data.deleted_by !== currentUserId) {
+                // Someone else deleted their copy, nothing to do for us
             }
-            
-            saveThemeSettings();
-            updateThemeVariables();
+        }
+    });
+
+    socket.on('messages_deleted', function(data) {
+        data.message_ids.forEach(id => {
+            let msgElement = document.querySelector(`[data-message-id="${id}"]`);
+            if (msgElement) {
+                msgElement.classList.add('deleted');
+                const msgContent = msgElement.querySelector('.msg-message');
+                if (msgContent) {
+                    msgContent.textContent = '[This message was deleted]';
+                }
+            }
         });
-    }
-    
-    // Initialize advanced theme system
-    initializeAdvancedThemeSystem();
+    });
 }
 
-function updateThemeVariables() {
-    const root = document.documentElement;
-    
-    // Apply bubble style
-    const bubbleStyle = themeSettings.bubbleStyle;
-    if (bubbleStyle === 'rounded') {
-        root.style.setProperty('--bubble-border-radius', '20px');
-        root.style.setProperty('--receiver-bubble-radius', '0px 20px 20px 20px');
-    } else if (bubbleStyle === 'sharp') {
-        root.style.setProperty('--bubble-border-radius', '5px');
-        root.style.setProperty('--receiver-bubble-radius', '0px 5px 5px 5px');
-    } else if (bubbleStyle === 'modern') {
-        root.style.setProperty('--bubble-border-radius', '20px 5px 20px 20px');
-        root.style.setProperty('--receiver-bubble-radius', '5px 20px 20px 5px');
-    }
-    
-    // Apply message colors
-    root.style.setProperty('--sender-bubble-color', themeSettings.messageColors.sender);
-    root.style.setProperty('--receiver-bubble-color', themeSettings.messageColors.receiver);
-    root.style.setProperty('--message-text-color', themeSettings.messageColors.text);
-    
-    // Apply chat background
-    const bg = themeSettings.chatBackground;
-    if (bg.type === 'solid') {
-        root.style.setProperty('--chat-bg-image', 'none');
-        root.style.setProperty('--chat-bg-color', bg.color || 'var(--theme-bg-color)');
-        root.style.setProperty('--chat-bg-gradient', 'none');
-    } else if (bg.type === 'gradient') {
-        root.style.setProperty('--chat-bg-image', 'none');
-        root.style.setProperty('--chat-bg-gradient', bg.gradient);
-        root.style.setProperty('--chat-bg-color', 'transparent');
-    } else if (bg.type === 'custom') {
-        root.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
-        root.style.setProperty('--chat-bg-gradient', 'none');
-        root.style.setProperty('--chat-bg-color', 'transparent');
-    } else {
-        root.style.setProperty('--chat-bg-image', `url('${bg.url}')`);
-        root.style.setProperty('--chat-bg-gradient', 'none');
-        root.style.setProperty('--chat-bg-color', 'transparent');
-    }
-    
-    // Apply message spacing
-    root.style.setProperty('--message-spacing', themeSettings.messageSpacing + 'px');
-    
-    // Apply font settings
-    root.style.setProperty('--selected-font-family', themeSettings.fontSettings.family);
-    root.style.setProperty('--selected-font-size', themeSettings.fontSettings.size);
-}
 
-function initializeAdvancedThemeSystem() {
-    const themeSettingsExpand = document.getElementById('themeSettingsExpand');
-    const themeSettingsPanel = document.getElementById('themeSettingsPanel');
+///////////////////////Add Button Toggle/////////////////
+
+////////////////////////////SELECTED ACTIVE USER BG//////
+document.addEventListener("DOMContentLoaded", function () {
+    function handleListClick(event) {
+        const target = event.target;
+
+        if (target.tagName === "LI") {
+            target.parentElement.querySelectorAll("li").forEach(li => li.classList.remove("selected"));
+
+            target.classList.add("selected");
+
+        }
+    }
+
+    document.querySelector(".msg1 ul").addEventListener("click", handleListClick);
+    document.querySelector(".msg2 ul").addEventListener("click", handleListClick);
+});
+
+/////////////////////////word break/////////////////
+document.querySelectorAll('.msg-message').forEach(msg => {
+    msg.innerHTML = msg.innerHTML.replace(/(\S{15})/g, '$1\u200B');
+});
+
+////////////////////////////////////////
+
+// Function to handle mobile view transitions
+function setupMobileView() {
+    const isMobile = window.innerWidth <= 768;
     
-    if (!themeSettingsExpand || !themeSettingsPanel) {
-        console.log('Theme settings elements not found');
+    if (isMobile) {
+      if (!document.querySelector('.back-button')) {
+        const backButton = document.createElement('button');
+        backButton.className = 'back-button';
+        backButton.innerHTML = '<i class="fas fa-arrow-left"></i>';
+        backButton.addEventListener('click', goBackToRecents);
+
+        const chatHeader = document.querySelector('.chat-header');
+        if (chatHeader) {
+            chatHeader.insertBefore(backButton, chatHeader.firstChild);
+        }
+      }
+    }
+  }
+  
+  function showChatOnMobile() {
+    if (window.innerWidth <= 768) {
+      const app = document.querySelector('.app');
+      if (app) app.classList.add('chat-active');
+    }
+  }
+  
+  function goBackToRecents() {
+    const app = document.querySelector('.app');
+    if (app) app.classList.remove('chat-active');
+    
+    document.querySelectorAll('.msg1 ul li, .msg2 ul li').forEach(li => {
+        li.classList.remove('selected');
+    });
+    
+    currentRecipientId = null;
+    localStorage.removeItem("selectedUserId");
+  }
+  
+  // Update startChat function to include mobile view
+  if (typeof startChat !== 'undefined') {
+    const originalStartChat = startChat;
+    startChat = function(recipientId, username) {
+        originalStartChat(recipientId, username);
+        showChatOnMobile();
+    };
+  }
+  
+  window.addEventListener('resize', setupMobileView);
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    setupMobileView();
+    
+    if (typeof currentRecipientId !== 'undefined' && currentRecipientId && window.innerWidth <= 768) {
+      showChatOnMobile();
+    }
+  });
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    // Only run this code on mobile devices
+    if (window.innerWidth <= 768) {
+      const chatHeader = document.querySelector('.chat-profile');
+      const detailArea = document.querySelector('.detail-area');
+      const body = document.body;
+      
+      if (detailArea) {
+        // Create close button for detail view
+        const closeButton = document.createElement('button');
+        closeButton.className = 'detail-area-close';
+        closeButton.innerHTML = '&times;';
+        detailArea.prepend(closeButton);
+        
+        // Show detail area when chat header is clicked
+        if (chatHeader) {
+            chatHeader.addEventListener('click', function() {
+                detailArea.classList.add('mobile-visible');
+                body.classList.add('detail-open');
+            });
+        }
+        
+        // Hide detail area when close button is clicked
+        closeButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent event bubbling
+            detailArea.classList.remove('mobile-visible');
+            body.classList.remove('detail-open');
+        });
+        
+        // Hide detail area when clicking outside of it
+        document.addEventListener('click', function(e) {
+            if (detailArea.classList.contains('mobile-visible') && 
+                !detailArea.contains(e.target) && 
+                !chatHeader.contains(e.target)) {
+                detailArea.classList.remove('mobile-visible');
+                body.classList.remove('detail-open');
+            }
+        });
+        
+        // Also handle back button
+        window.addEventListener('popstate', function() {
+            if (detailArea.classList.contains('mobile-visible')) {
+                detailArea.classList.remove('mobile-visible');
+                body.classList.remove('detail-open');
+                history.pushState(null, document.title, window.location.href);
+            }
+        });
+        
+        // Prevent the detail view from closing when clicking inside it
+        detailArea.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+      }
+    }
+  });
+
+  /////////////////////////
+  document.getElementById("refresh-profile").addEventListener("click", function () {
+    location.reload();
+});
+
+
+/////////////////////
+
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get modal and elements
+    const agreementModal = document.getElementById('userAgreementModal');
+    const agreeCheckbox = document.getElementById('agreeTerms');
+    const confirmBtn = document.getElementById('confirmAgreement');
+    const cancelBtn = document.getElementById('cancelAgreement');
+
+    // Check if elements exist
+    if (!agreementModal || !agreeCheckbox || !confirmBtn || !cancelBtn) {
+        console.error('Agreement modal elements missing');
         return;
     }
 
-    // Toggle theme settings panel
-    themeSettingsExpand.addEventListener('click', function() {
-        themeSettingsPanel.classList.toggle('expanded');
-        const icon = this.querySelector('i');
-        if (themeSettingsPanel.classList.contains('expanded')) {
-            icon.className = 'fas fa-chevron-up';
-            this.innerHTML = '<i class="fas fa-chevron-up"></i> Less Settings';
-        } else {
-            icon.className = 'fas fa-chevron-down';
-            this.innerHTML = '<i class="fas fa-chevron-down"></i> More Settings';
-        }
-    });
+    // Initialize modal state
+    confirmBtn.disabled = true;
 
-    // Initialize background options
-    const bgOptions = document.querySelectorAll('.bg-option');
-    bgOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            bgOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            
-            const bgType = this.dataset.bg;
-            themeSettings.chatBackground.type = bgType;
-            
-            if (bgType === 'solid') {
-                themeSettings.chatBackground.url = '';
-                themeSettings.chatBackground.color = this.dataset.bgColor;
-                themeSettings.chatBackground.gradient = '';
-            } else if (bgType === 'gradient') {
-                themeSettings.chatBackground.url = '';
-                themeSettings.chatBackground.color = '';
-                themeSettings.chatBackground.gradient = this.dataset.bgGradient;
-            } else if (bgType === 'custom') {
-                document.getElementById('bgUpload').click();
-                return;
-            } else {
-                themeSettings.chatBackground.url = this.dataset.bgUrl;
-                themeSettings.chatBackground.color = '';
-                themeSettings.chatBackground.gradient = '';
-            }
-            
-            updateThemeVariables();
-            saveThemeSettings();
-        });
-    });
-
-    // Custom background upload
-    const bgUpload = document.getElementById('bgUpload');
-    const customBgOption = document.getElementById('customBgOption');
-    
-    if (bgUpload && customBgOption) {
-        bgUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const bgUrl = e.target.result;
-                    
-                    // Update custom preview
-                    const customPreview = customBgOption.querySelector('.bg-preview');
-                    if (customPreview) {
-                        customPreview.style.backgroundImage = `url('${bgUrl}')`;
-                        customPreview.innerHTML = '';
-                    }
-                    
-                    // Update theme settings
-                    bgOptions.forEach(opt => opt.classList.remove('selected'));
-                    customBgOption.classList.add('selected');
-                    
-                    themeSettings.chatBackground.type = 'custom';
-                    themeSettings.chatBackground.url = bgUrl;
-                    themeSettings.chatBackground.color = '';
-                    themeSettings.chatBackground.gradient = '';
-                    
-                    updateThemeVariables();
-                    saveThemeSettings();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+    // Function to show modal
+    function showAgreementModal() {
+        agreementModal.classList.add('active');
+        document.body.classList.add('modal-open');
     }
 
-    // Color pickers
-    const colorPickers = document.querySelectorAll('.color-picker');
-    colorPickers.forEach(picker => {
-        picker.addEventListener('input', function() {
-            const color = this.value;
-            const id = this.id;
-            
-            if (id === 'senderColor') {
-                themeSettings.messageColors.sender = color;
-            } else if (id === 'receiverColor') {
-                themeSettings.messageColors.receiver = color;
-            } else if (id === 'textColor') {
-                themeSettings.messageColors.text = color;
-            }
-            
-            updateThemeVariables();
-            saveThemeSettings();
-        });
-    });
-
-    // Bubble style selection
-    const bubbleOptions = document.querySelectorAll('.bubble-option');
-    bubbleOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            bubbleOptions.forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-            
-            const style = this.dataset.bubble;
-            themeSettings.bubbleStyle = style;
-            
-            updateThemeVariables();
-            saveThemeSettings();
-        });
-    });
-
-    // Message spacing slider
-    const messageSpacingSlider = document.getElementById('messageSpacing');
-    const spacingValue = document.getElementById('spacingValue');
-    if (messageSpacingSlider && spacingValue) {
-        messageSpacingSlider.addEventListener('input', function() {
-            const value = this.value + 'px';
-            spacingValue.textContent = value;
-            themeSettings.messageSpacing = parseInt(this.value);
-            updateThemeVariables();
-            saveThemeSettings();
-        });
+    // Function to hide modal
+    function hideAgreementModal() {
+        agreementModal.classList.remove('active');
+        document.body.classList.remove('modal-open');
     }
 
-    // Font family selection
-    const fontFamilySelect = document.getElementById('fontFamily');
-    if (fontFamilySelect) {
-        fontFamilySelect.addEventListener('change', function() {
-            themeSettings.fontSettings.family = this.value;
-            updateThemeVariables();
-            saveThemeSettings();
-        });
-    }
-
-    // Font size selection
-    const fontSizeSelect = document.getElementById('fontSize');
-    if (fontSizeSelect) {
-        fontSizeSelect.addEventListener('change', function() {
-            themeSettings.fontSettings.size = this.value;
-            updateThemeVariables();
-            saveThemeSettings();
-        });
-    }
-
-    // Reset theme to default
-    const resetThemeBtn = document.getElementById('resetTheme');
-    if (resetThemeBtn) {
-        resetThemeBtn.addEventListener('click', function() {
-            if (confirm('Reset all theme settings to default?')) {
-                resetThemeSettings();
-            }
-        });
-    }
-
-    // Save theme
-    const saveThemeBtn = document.getElementById('saveTheme');
-    if (saveThemeBtn) {
-        saveThemeBtn.addEventListener('click', function() {
-            saveThemeSettings();
-            alert('Theme settings saved successfully!');
-        });
-    }
-
-    // Export theme
-    const exportThemeBtn = document.getElementById('exportTheme');
-    if (exportThemeBtn) {
-        exportThemeBtn.addEventListener('click', function() {
-            exportThemeSettings();
-        });
-    }
-
-    // Import theme
-    const importThemeBtn = document.getElementById('importTheme');
-    const themeImportFile = document.getElementById('themeImportFile');
-    
-    if (importThemeBtn) {
-        importThemeBtn.addEventListener('click', function() {
-            if (themeImportFile) themeImportFile.click();
-        });
-    }
-
-    if (themeImportFile) {
-        themeImportFile.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const importedTheme = JSON.parse(e.target.result);
-                        applyImportedTheme(importedTheme);
-                        saveThemeSettings();
-                        alert('Theme imported successfully!');
-                    } catch (error) {
-                        alert('Error importing theme. Invalid file format.');
-                    }
-                };
-                reader.readAsText(file);
-            }
-        });
-    }
-}
-
-function loadThemeSettings() {
-    const savedTheme = localStorage.getItem('chatThemeSettings');
-    if (savedTheme) {
+    // Check agreement status from server instead of localStorage
+    async function checkAgreementStatus() {
         try {
-            const parsed = JSON.parse(savedTheme);
-            // Merge with default settings
-            themeSettings = {
-                ...themeSettings,
-                ...parsed,
-                chatBackground: {
-                    ...themeSettings.chatBackground,
-                    ...parsed.chatBackground
+            const response = await fetch('/check_agreement_status', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
                 },
-                messageColors: {
-                    ...themeSettings.messageColors,
-                    ...parsed.messageColors
-                },
-                fontSettings: {
-                    ...themeSettings.fontSettings,
-                    ...parsed.fontSettings
+                credentials: 'same-origin'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Show modal only if user hasn't accepted agreement
+                if (!data.accepted) {
+                    setTimeout(showAgreementModal, 100);
                 }
-            };
-            
-            console.log('Loaded theme settings:', themeSettings);
+            }
         } catch (error) {
-            console.error('Error loading theme settings:', error);
+            console.error('Error checking agreement status:', error);
         }
     }
-}
 
-function applyThemeSettings() {
-    console.log('Applying theme settings...', themeSettings);
-    
-    // Apply primary theme color
-    document.body.setAttribute('data-theme', themeSettings.primaryColor);
-    
-    // Apply dark mode
-    if (themeSettings.darkMode) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
-    
-    // Update UI from settings
-    updateUIFromSettings();
-    
-    // Update CSS variables
-    updateThemeVariables();
-    
-    // Force a re-render of conversation area to apply background
-    const conversationArea = document.getElementById('conversation-area');
-    if (conversationArea) {
-        conversationArea.style.backgroundImage = 'none';
-        setTimeout(() => {
-            updateThemeVariables();
-        }, 10);
-    }
-}
+    // Check agreement status on page load
+    checkAgreementStatus();
 
-function updateUIFromSettings() {
-    // Update color pickers
-    const senderColorPicker = document.getElementById('senderColor');
-    const receiverColorPicker = document.getElementById('receiverColor');
-    const textColorPicker = document.getElementById('textColor');
-    
-    if (senderColorPicker) senderColorPicker.value = themeSettings.messageColors.sender;
-    if (receiverColorPicker) receiverColorPicker.value = themeSettings.messageColors.receiver;
-    if (textColorPicker) textColorPicker.value = themeSettings.messageColors.text;
-    
-    // Update background selection
-    const bgOptions = document.querySelectorAll('.bg-option');
-    bgOptions.forEach(option => {
-        option.classList.remove('selected');
-        if (option.dataset.bg === themeSettings.chatBackground.type) {
-            option.classList.add('selected');
-            
-            // Update custom preview if needed
-            if (option.dataset.bg === 'custom') {
-                const customPreview = option.querySelector('.bg-preview');
-                if (customPreview && themeSettings.chatBackground.url) {
-                    customPreview.style.backgroundImage = `url('${themeSettings.chatBackground.url}')`;
-                    customPreview.innerHTML = '';
-                }
+    // Checkbox handler
+    agreeCheckbox.addEventListener('change', function() {
+        confirmBtn.disabled = !this.checked;
+    });
+
+    // Confirm agreement handler
+    confirmBtn.addEventListener('click', async function() {
+        if (!agreeCheckbox.checked) return;
+
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span class="spinner"></span> Processing...';
+
+        try {
+            const response = await fetch('/accept_agreement', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Hide modal and reload page
+                hideAgreementModal();
+                window.location.reload();
+            } else {
+                throw new Error(data.message || 'Failed to save agreement');
+            }
+        } catch (error) {
+            console.error('Agreement error:', error);
+            alert('Error saving agreement. Please try again.');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm';
         }
     });
-    
-    // Update bubble style selection
-    const bubbleOptions = document.querySelectorAll('.bubble-option');
-    bubbleOptions.forEach(option => {
-        option.classList.remove('selected');
-        if (option.dataset.bubble === themeSettings.bubbleStyle) {
-            option.classList.add('selected');
-        }
+
+    // Cancel agreement handler
+    cancelBtn.addEventListener('click', function() {
+        hideAgreementModal();
+        window.location.href = '/logout';
     });
-    
-    // Update spacing slider
-    const spacingSlider = document.getElementById('messageSpacing');
-    const spacingValue = document.getElementById('spacingValue');
-    if (spacingSlider && spacingValue) {
-        spacingSlider.value = themeSettings.messageSpacing;
-        spacingValue.textContent = themeSettings.messageSpacing + 'px';
+
+    // CSRF token helper
+    function getCSRFToken() {
+        // Check for CSRF token in meta tag
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) return metaTag.content;
+        
+        // Check for CSRF token in cookie
+        const cookieMatch = document.cookie.match(/csrftoken=([^;]+)/);
+        if (cookieMatch) return cookieMatch[1];
+        
+        // Check for CSRF token in form input
+        const inputTag = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        if (inputTag) return inputTag.value;
+        
+        console.warn('CSRF token not found');
+        return '';
     }
-    
-    // Update font selects
-    const fontFamilySelect = document.getElementById('fontFamily');
-    const fontSizeSelect = document.getElementById('fontSize');
-    if (fontFamilySelect) fontFamilySelect.value = themeSettings.fontSettings.family;
-    if (fontSizeSelect) fontSizeSelect.value = themeSettings.fontSettings.size;
-    
-    // Update theme color selection
-    const colors = document.querySelectorAll('.color[data-theme="primary"]');
-    colors.forEach(color => {
-        color.classList.remove('selected');
-        if (color.getAttribute('data-color') === themeSettings.primaryColor) {
-            color.classList.add('selected');
-        }
-    });
-}
+});
 
-function saveThemeSettings() {
-    localStorage.setItem('chatThemeSettings', JSON.stringify(themeSettings));
-    console.log('Theme settings saved:', themeSettings);
-}
 
-function resetThemeSettings() {
-    themeSettings = {
-        primaryColor: 'blue',
-        chatBackground: {
-            type: 'pattern1',
-            url: '/static/Pattern_1.png',
-            color: '',
-            gradient: ''
-        },
-        messageColors: {
-            sender: '#144890',
-            receiver: '#dfdfdf',
-            text: '#000000'
-        },
-        bubbleStyle: 'rounded',
-        messageSpacing: 10,
-        fontSettings: {
-            family: "'Manrope', sans-serif",
-            size: '16px'
-        },
-        darkMode: false
-    };
-    
-    // Clear localStorage
-    localStorage.removeItem('chatThemeSettings');
-    localStorage.removeItem('themeColor');
-    localStorage.setItem('darkMode', 'false');
-    
-    applyThemeSettings();
-    updateUIFromSettings();
-    saveThemeSettings();
-    
-    alert('Theme reset to default settings!');
-    location.reload();
-}
 
-function exportThemeSettings() {
-    const themeData = JSON.stringify(themeSettings, null, 2);
-    const blob = new Blob([themeData], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `kwikchat-theme-${Date.now()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    alert('Theme exported successfully!');
-}
+/* ================= BULK MESSAGE DELETION ================= */
 
-function applyImportedTheme(importedTheme) {
-    themeSettings = {
-        ...themeSettings,
-        ...importedTheme,
-        chatBackground: {
-            ...themeSettings.chatBackground,
-            ...importedTheme.chatBackground
-        },
-        messageColors: {
-            ...themeSettings.messageColors,
-            ...importedTheme.messageColors
-        },
-        fontSettings: {
-            ...themeSettings.fontSettings,
-            ...importedTheme.fontSettings
-        }
-    };
-    
-    applyThemeSettings();
-    updateUIFromSettings();
-    saveThemeSettings();
-}
+// Store selected messages with their metadata
+let selectedMessages = new Map(); // messageId -> {element, senderId, canDeleteForEveryone}
+let selectionMode = false;
+const toolbar = document.getElementById("selection-toolbar");
 
-/* ================= SELECTION SYSTEM FUNCTIONS ================= */
-
-function initializeSelectionSystem() {
-    // Add CSS class for hidden delete for everyone button
-    if (!document.querySelector('#selection-toolbar-style')) {
-        const style = document.createElement('style');
-        style.id = 'selection-toolbar-style';
-        style.textContent = `
-            #delete-for-everyone-selected.hidden {
-                display: none !important;
-            }
-            .msg.selected {
-                background-color: rgba(0, 123, 255, 0.1) !important;
-                border: 2px solid #007bff !important;
-            }
-        `;
-        document.head.appendChild(style);
-    }
-}
-
+// Function to update toolbar
 function updateToolbar() {
     if (!toolbar) return;
     
@@ -705,9 +542,10 @@ function updateToolbar() {
         countEl.innerText = selectedMessages.size;
     }
     
+    // Show/hide delete for everyone button based on permissions
     let canDeleteForEveryone = false;
     selectedMessages.forEach(msg => {
-        if (msg.canDeleteForEveryone && msg.senderId === window.currentUserId) {
+        if (msg.canDeleteForEveryone && msg.senderId === currentUserId) {
             canDeleteForEveryone = true;
         }
     });
@@ -720,6 +558,7 @@ function updateToolbar() {
         }
     }
     
+    // Show/hide toolbar
     if (selectedMessages.size > 0) {
         toolbar.classList.add("show");
         selectionMode = true;
@@ -729,13 +568,16 @@ function updateToolbar() {
     }
 }
 
+// Function to add/remove message from selection
 function toggleSelection(msg, messageId, senderId, canDeleteForEveryone) {
     if (!msg || !messageId || !senderId) return;
     
     if (selectedMessages.has(messageId)) {
+        // Deselect
         msg.classList.remove("selected");
         selectedMessages.delete(messageId);
     } else {
+        // Select
         msg.classList.add("selected");
         selectedMessages.set(messageId, {
             element: msg,
@@ -746,155 +588,48 @@ function toggleSelection(msg, messageId, senderId, canDeleteForEveryone) {
     updateToolbar();
 }
 
-function clearSelection() {
-    selectedMessages.forEach(msg => {
-        if (msg && msg.element) {
-            msg.element.classList.remove("selected");
-        }
-    });
-    selectedMessages.clear();
-    updateToolbar();
-}
-
-async function deleteSelectedMessages(deleteType) {
-    if (selectedMessages.size === 0) return false;
+// Message click handlers
+document.addEventListener("click", e => {
+    const msg = e.target.closest(".msg");
+    if (!msg || msg.classList.contains('deleted')) return;
     
-    try {
-        const messageIds = Array.from(selectedMessages.keys());
-        
-        const response = await fetch('/delete_message', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message_ids: messageIds,
-                delete_type: deleteType
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            messageIds.forEach(messageId => {
-                if (selectedMessages.has(messageId)) {
-                    const msg = selectedMessages.get(messageId);
-                    if (msg && msg.element) {
-                        msg.element.classList.add('deleted');
-                        const msgContent = msg.element.querySelector('.msg-message');
-                        if (msgContent) {
-                            if (deleteType === 'for_everyone') {
-                                msgContent.textContent = '[This message was deleted]';
-                            } else if (deleteType === 'for_me') {
-                                const isSender = msg.senderId === window.currentUserId;
-                                msgContent.textContent = isSender ? '[You deleted this message]' : '[Message deleted]';
-                            }
-                        }
-                    }
-                    selectedMessages.delete(messageId);
-                }
-            });
-            
-            updateToolbar();
-            return true;
-        } else {
-            alert(result.error || 'Failed to delete messages');
-            return false;
-        }
-    } catch (error) {
-        console.error('Error deleting messages:', error);
-        alert('Error deleting messages');
-        return false;
+    const messageId = msg.dataset.messageId;
+    const senderId = parseInt(msg.dataset.senderId);
+    
+    if (!messageId || !senderId) return;
+    
+    if (e.ctrlKey || e.metaKey) {
+        // Ctrl/Cmd + click for selection
+        e.preventDefault();
+        toggleSelection(msg, messageId, senderId, msg.dataset.canDeleteForEveryone === 'true');
+    } else if (selectionMode) {
+        // Regular click when in selection mode
+        toggleSelection(msg, messageId, senderId, msg.dataset.canDeleteForEveryone === 'true');
     }
-}
+});
 
-/* ================= EVENT LISTENERS INITIALIZATION ================= */
+// Long press for mobile
+let pressTimer = null;
 
-function initializeEventListeners() {
-    // Add button toggle
-    const addButton = document.getElementById("addtoggleButton");
-    const recentsArea = document.querySelector(".msg-detail");
-    const registeredUsers = document.querySelector(".registeredusers");
-
-    if (addButton && recentsArea && registeredUsers) {
-        addButton.addEventListener("click", function () {
-            this.classList.toggle("back");
-            if (this.classList.contains("back")) {
-                recentsArea.style.display = "none";
-                registeredUsers.style.display = "flex"; 
-            } else {
-                registeredUsers.style.display = "none";
-                recentsArea.style.display = "block";  
-            }
-        });
-    }
-
-    // Scroll functionality
-    const conversationArea = document.getElementById("conversation-area");
-    const scrollDownBtn = document.getElementById("scroll-down-btn");
-
-    if (conversationArea && scrollDownBtn) {
-        function scrollToBottom() {
-            conversationArea.scrollTo({
-                top: conversationArea.scrollHeight,
-                behavior: "smooth"
-            });
-        }
-        
-        function toggleScrollButton() {
-            const isAtBottom = conversationArea.scrollHeight - conversationArea.scrollTop <= conversationArea.clientHeight + 10;
-            if (isAtBottom) {
-                scrollDownBtn.classList.remove("show");
-            } else {
-                scrollDownBtn.classList.add("show");
-            }
-        }
-
-        conversationArea.addEventListener("scroll", toggleScrollButton);
-        scrollDownBtn.addEventListener("click", scrollToBottom);
-    }
-
-    // Message click handlers for selection
-    document.addEventListener("click", e => {
-        const msg = e.target.closest(".msg");
-        if (!msg || msg.classList.contains('deleted')) return;
-        
+document.addEventListener("touchstart", e => {
+    const msg = e.target.closest(".msg");
+    if (!msg || msg.classList.contains('deleted')) return;
+    
+    pressTimer = setTimeout(() => {
         const messageId = msg.dataset.messageId;
         const senderId = parseInt(msg.dataset.senderId);
-        
-        if (!messageId || !senderId) return;
-        
-        const canDeleteForEveryone = msg.dataset.canDeleteForEveryone === 'true';
-        
-        if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            toggleSelection(msg, messageId, senderId, canDeleteForEveryone);
-        } else if (selectionMode) {
-            toggleSelection(msg, messageId, senderId, canDeleteForEveryone);
+        if (messageId && senderId) {
+            toggleSelection(msg, messageId, senderId, msg.dataset.canDeleteForEveryone === 'true');
         }
-    });
+    }, 450);
+});
 
-    // Long press for mobile
-    let pressTimer = null;
+document.addEventListener("touchend", () => {
+    clearTimeout(pressTimer);
+});
 
-    document.addEventListener("touchstart", e => {
-        const msg = e.target.closest(".msg");
-        if (!msg || msg.classList.contains('deleted')) return;
-        
-        pressTimer = setTimeout(() => {
-            const messageId = msg.dataset.messageId;
-            const senderId = parseInt(msg.dataset.senderId);
-            if (messageId && senderId) {
-                const canDeleteForEveryone = msg.dataset.canDeleteForEveryone === 'true';
-                toggleSelection(msg, messageId, senderId, canDeleteForEveryone);
-            }
-        }, 450);
-    });
-
-    document.addEventListener("touchend", () => {
-        clearTimeout(pressTimer);
-    });
-
+// Initialize delete button event listeners
+document.addEventListener('DOMContentLoaded', function() {
     // Delete selected messages for me
     const deleteForMeBtn = document.getElementById("delete-for-me-selected");
     if (deleteForMeBtn) {
@@ -907,9 +642,19 @@ function initializeEventListeners() {
             
             if (!confirm(confirmMsg)) return;
             
-            const success = await deleteSelectedMessages('for_me');
-            if (success) {
+            const messageIds = Array.from(selectedMessages.keys());
+            
+            try {
+                // Delete each message
+                for (const messageId of messageIds) {
+                    await deleteMessage(messageId, 'for_me');
+                }
+                
+                // Clear selection
                 clearSelection();
+            } catch (error) {
+                console.error('Error deleting messages:', error);
+                alert('Error deleting messages');
             }
         });
     }
@@ -920,9 +665,10 @@ function initializeEventListeners() {
         deleteForEveryoneBtn.addEventListener("click", async () => {
             if (selectedMessages.size === 0) return;
             
+            // Check if user has permission to delete all selected messages for everyone
             const messagesToDelete = Array.from(selectedMessages.values());
             const canDeleteAll = messagesToDelete.every(msg => 
-                msg.senderId === window.currentUserId && msg.canDeleteForEveryone
+                msg.senderId === currentUserId && msg.canDeleteForEveryone
             );
             
             if (!canDeleteAll) {
@@ -936,9 +682,19 @@ function initializeEventListeners() {
             
             if (!confirm(confirmMsg)) return;
             
-            const success = await deleteSelectedMessages('for_everyone');
-            if (success) {
+            const messageIds = Array.from(selectedMessages.keys());
+            
+            try {
+                // Delete each message for everyone
+                for (const messageId of messageIds) {
+                    await deleteMessage(messageId, 'for_everyone');
+                }
+                
+                // Clear selection
                 clearSelection();
+            } catch (error) {
+                console.error('Error deleting messages:', error);
+                alert('Error deleting messages');
             }
         });
     }
@@ -958,7 +714,7 @@ function initializeEventListeners() {
                 const msgElement = msg.element;
                 const t = msgElement.querySelector(".msg-message")?.innerText;
                 const timestamp = msgElement.querySelector(".msg-time")?.innerText;
-                if (t && !t.startsWith('[')) {
+                if (t && !t.startsWith('[')) { // Don't copy deleted messages
                     text += `${t} (${timestamp})\n\n`;
                 }
             });
@@ -972,156 +728,137 @@ function initializeEventListeners() {
             }
         });
     }
+});
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && selectedMessages.size > 0) {
-            clearSelection();
-        }
+// Delete single message function
+async function deleteMessage(messageId, deleteType) {
+    try {
+        const response = await fetch('/delete_message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message_id: messageId,
+                delete_type: deleteType
+            })
+        });
         
-        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-            e.preventDefault();
-            const messages = document.querySelectorAll('#conversation-area .msg:not(.deleted)');
-            messages.forEach(msg => {
-                const messageId = msg.dataset.messageId;
-                const senderId = parseInt(msg.dataset.senderId);
-                if (messageId && senderId) {
-                    if (!selectedMessages.has(messageId)) {
-                        const canDeleteForEveryone = msg.dataset.canDeleteForEveryone === 'true';
-                        toggleSelection(msg, messageId, senderId, canDeleteForEveryone);
+        const result = await response.json();
+        
+        if (result.success) {
+            // Remove from selection if it was selected
+            if (selectedMessages.has(messageId)) {
+                selectedMessages.delete(messageId);
+                updateToolbar();
+            }
+            
+            // Update message display locally
+            const msgElement = document.querySelector(`[data-message-id="${messageId}"]`);
+            if (msgElement) {
+                if (deleteType === 'for_everyone') {
+                    msgElement.classList.add('deleted');
+                    const msgContent = msgElement.querySelector('.msg-message');
+                    if (msgContent) {
+                        msgContent.textContent = '[This message was deleted]';
                     }
-                }
-            });
-        }
-    });
-}
-
-/* ================= USER AGREEMENT MODAL ================= */
-
-function initializeAgreementModal() {
-    const agreementModal = document.getElementById('userAgreementModal');
-    const agreeCheckbox = document.getElementById('agreeTerms');
-    const confirmBtn = document.getElementById('confirmAgreement');
-    const cancelBtn = document.getElementById('cancelAgreement');
-
-    if (!agreementModal || !agreeCheckbox || !confirmBtn || !cancelBtn) {
-        return;
-    }
-
-    confirmBtn.disabled = true;
-
-    function showAgreementModal() {
-        agreementModal.classList.add('active');
-        document.body.classList.add('modal-open');
-    }
-
-    function hideAgreementModal() {
-        agreementModal.classList.remove('active');
-        document.body.classList.remove('modal-open');
-    }
-
-    async function checkAgreementStatus() {
-        try {
-            const response = await fetch('/check_agreement_status', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                if (!data.accepted) {
-                    setTimeout(showAgreementModal, 100);
-                }
-            }
-        } catch (error) {
-            console.error('Error checking agreement status:', error);
-        }
-    }
-
-    // Check agreement status on load
-    checkAgreementStatus();
-
-    agreeCheckbox.addEventListener('change', function() {
-        confirmBtn.disabled = !this.checked;
-    });
-
-    confirmBtn.addEventListener('click', async function() {
-        if (!agreeCheckbox.checked) return;
-
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<span class="spinner"></span> Processing...';
-
-        try {
-            const response = await fetch('/accept_agreement', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'same-origin'
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                hideAgreementModal();
-                window.location.reload();
-            } else {
-                throw new Error(data.message || 'Failed to save agreement');
-            }
-        } catch (error) {
-            console.error('Error accepting agreement:', error);
-            alert('Failed to save agreement. Please try again.');
-            confirmBtn.disabled = false;
-            confirmBtn.textContent = 'Confirm';
-        }
-    });
-
-    cancelBtn.addEventListener('click', function() {
-        if (confirm('You must accept the terms to use KwikChat. Would you like to logout instead?')) {
-            window.location.href = '/logout';
-        }
-    });
-
-    // Close modal when clicking outside
-    agreementModal.addEventListener('click', function(e) {
-        if (e.target === agreementModal) {
-            if (confirm('You must accept the terms to use KwikChat. Would you like to logout instead?')) {
-                window.location.href = '/logout';
-            }
-        }
-    });
-
-    // Add keyboard support
-    document.addEventListener('keydown', function(e) {
-        if (agreementModal.classList.contains('active')) {
-            if (e.key === 'Escape') {
-                if (confirm('You must accept the terms to use KwikChat. Would you like to logout instead?')) {
-                    window.location.href = '/logout';
+                } else if (deleteType === 'for_me') {
+                    msgElement.classList.add('deleted');
+                    const msgContent = msgElement.querySelector('.msg-message');
+                    if (msgContent) {
+                        const isSender = parseInt(msgElement.dataset.senderId) === currentUserId;
+                        msgContent.textContent = isSender ? '[You deleted this message]' : '[Message deleted]';
+                    }
                 }
             }
             
-            if (e.key === 'Enter' && agreeCheckbox.checked && !confirmBtn.disabled) {
-                confirmBtn.click();
+            return true;
+        } else {
+            alert(result.error || 'Failed to delete message');
+            return false;
+        }
+    } catch (error) {
+        console.error('Error deleting message:', error);
+        alert('Error deleting message');
+        return false;
+    }
+}
+
+// Socket handler for deletion events from other users
+if (typeof socket !== 'undefined') {
+    socket.on('message_deleted', function(data) {
+        const msgElement = document.querySelector(`[data-message-id="${data.message_id}"]`);
+        
+        if (msgElement) {
+            // Remove from selection if it was selected
+            if (selectedMessages.has(data.message_id)) {
+                selectedMessages.delete(data.message_id);
+                updateToolbar();
+            }
+            
+            // Update message display
+            if (data.delete_type === 'for_everyone') {
+                msgElement.classList.add('deleted');
+                const msgContent = msgElement.querySelector('.msg-message');
+                if (msgContent) {
+                    msgContent.textContent = '[This message was deleted]';
+                }
             }
         }
     });
 }
 
-/* ================= INITIALIZE ALL FUNCTIONALITIES ================= */
+// Clear selection function
+function clearSelection() {
+    selectedMessages.forEach(msg => {
+        msg.element.classList.remove("selected");
+    });
+    selectedMessages.clear();
+    updateToolbar();
+}
 
-// Export functions to global scope
-window.toggleSelection = toggleSelection;
-window.clearSelection = clearSelection;
-window.deleteSelectedMessages = deleteSelectedMessages;
-window.loadThemeSettings = loadThemeSettings;
-window.applyThemeSettings = applyThemeSettings;
-window.saveThemeSettings = saveThemeSettings;
+// Add keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Escape to cancel selection
+    if (e.key === 'Escape' && selectedMessages.size > 0) {
+        clearSelection();
+    }
+    
+    // Ctrl+A to select all messages in current chat
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        const messages = document.querySelectorAll('#conversation-area .msg:not(.deleted)');
+        messages.forEach(msg => {
+            const messageId = msg.dataset.messageId;
+            const senderId = parseInt(msg.dataset.senderId);
+            if (messageId && senderId) {
+                if (!selectedMessages.has(messageId)) {
+                    toggleSelection(msg, messageId, senderId, msg.dataset.canDeleteForEveryone === 'true');
+                }
+            }
+        });
+    }
+    
+    // Ctrl+D to delete selected for me
+    if ((e.ctrlKey || e.metaKey) && e.key === 'd' && selectedMessages.size > 0) {
+        e.preventDefault();
+        const deleteForMeBtn = document.getElementById('delete-for-me-selected');
+        if (deleteForMeBtn) deleteForMeBtn.click();
+    }
+    
+    // Ctrl+Shift+D to delete selected for everyone
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D' && selectedMessages.size > 0) {
+        e.preventDefault();
+        const deleteForEveryoneBtn = document.getElementById('delete-for-everyone-selected');
+        if (deleteForEveryoneBtn) deleteForEveryoneBtn.click();
+    }
+});
 
-console.log('KwikChat JavaScript loaded successfully!');
+// Add CSS class for hidden delete for everyone button
+const style = document.createElement('style');
+style.textContent = `
+    #delete-for-everyone-selected.hidden {
+        display: none !important;
+    }
+`;
+document.head.appendChild(style);
