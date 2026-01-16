@@ -176,6 +176,7 @@ overflow: hidden;
     display: flex;
     flex-grow: 1;
     overflow: hidden;
+    height: calc(100vh - 80px); 
 }
    
 .logo {
@@ -480,6 +481,7 @@ cursor: pointer;
     display: flex;
     flex-direction: column;
     display:none;
+    height: 100%;
 }
 
 .sender {
