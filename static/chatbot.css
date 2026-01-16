@@ -38,9 +38,9 @@
 .chatbot-container {
     position: fixed;
     bottom: 50px;
-    right: 25px;
+    right: 50px;
     width: 380px;
-    height: 580px;
+    height: 80vh;
     background: rgba(var(--theme-bg-color-rgb), 0.85);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -291,7 +291,7 @@
 .welcome-card {
     background: rgba(var(--input-bg-rgb), 0.7);
     border-radius: 15px;
-    padding: 25px;
+    padding: 15px;
     text-align: center;
     border: 1px solid rgba(var(--theme-color-rgb), 0.1);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
@@ -316,7 +316,7 @@
 }
 
 .welcome-card h4 {
-    margin: 0 0 10px 0;
+    margin: 0 0 0px 0;
     font-size: 18px;
     color: var(--body-color);
 }
@@ -363,16 +363,7 @@
     box-shadow: 0 4px 12px rgba(var(--theme-color-rgb), 0.2);
 }
 
-.chatbot-message.user::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    right: -6px;
-    width: 12px;
-    height: 12px;
-    background: linear-gradient(135deg, var(--theme-color), var(--theme-glow));
-    clip-path: polygon(100% 0, 0 0, 100% 100%);
-}
+
 
 .chatbot-message.bot {
     align-self: flex-start;
@@ -382,23 +373,11 @@
     border-bottom-left-radius: 5px;
 }
 
-.chatbot-message.bot::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: -6px;
-    width: 12px;
-    height: 12px;
-    background: rgba(var(--input-bg-rgb), 0.8);
-    border-left: 1px solid rgba(var(--border-color-rgb), 0.3);
-    border-bottom: 1px solid rgba(var(--border-color-rgb), 0.3);
-    clip-path: polygon(0 0, 0 100%, 100% 0);
-}
 
 /* Message Time */
 .message-time {
     display: block;
-    font-size: 11px;
+    Font-size: 11px;
     opacity: 0.7;
     margin-top: 5px;
     text-align: right;
@@ -437,7 +416,7 @@
 /* Premium Input Area */
 .chatbot-input-container {
     position: relative;
-    padding: 15px 20px;
+    padding: 10px 10px;
     background: rgba(var(--theme-bg-color-rgb), 0.9);
     border-top: 1px solid rgba(var(--border-color-rgb), 0.3);
 }
@@ -619,14 +598,15 @@
 .send-btn:hover .send-tooltip {
     opacity: 1;
 }
-
-/* Smart Suggestions */
+/* Smart Suggestions - Compact Version */
 .smart-suggestions {
-    max-height: 100px !important; /* Reduce from ~200px */
+    max-height: 100px !important;
     overflow-y: auto;
-    padding: 15px 20px;
-    background: rgba(var(--theme-bg-color-rgb), 0.8);
-    border-top: 1px solid rgba(var(--border-color-rgb), 0.2);
+    padding: 10px 10px;
+    background: rgba(var(--theme-bg-color-rgb), 0.7);
+    border-top: 1px solid rgba(var(--border-color-rgb), 0.15);
+    border-bottom: 1px solid rgba(var(--border-color-rgb), 0.1);
+    backdrop-filter: blur(5px);
 }
 .smart-suggestions::-webkit-scrollbar {
     display: none;
@@ -635,82 +615,256 @@
 .suggestions-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
+    justify-content: space-between;
+    /* margin-bottom: 10px; */
     color: var(--body-color);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.suggestions-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.suggestions-title i {
+    color: var(--theme-color);
     font-size: 14px;
 }
 
-.suggestions-header i {
+.suggestions-count {
+    background: rgba(var(--theme-color-rgb), 0.1);
     color: var(--theme-color);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
 }
 
+/* Horizontal scrolling cards */
 .suggestion-cards {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+.suggestion-cards::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
 }
 
 .suggestion-card {
-    padding: 12px;
-    background: rgba(var(--input-bg-rgb), 0.6);
+    flex: 0 0 auto;
+    width: 140px;
+    padding: 10px 12px;
+    background: rgba(var(--input-bg-rgb), 0.8);
     border: 1px solid rgba(var(--border-color-rgb), 0.2);
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    text-align: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .suggestion-card:hover {
-    background: rgba(var(--theme-color-rgb), 0.1);
-    transform: translateY(-3px);
-    border-color: rgba(var(--theme-color-rgb), 0.3);
-    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+    background: rgba(var(--theme-color-rgb), 0.08);
+    transform: translateY(-2px);
+    border-color: rgba(var(--theme-color-rgb), 0.25);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.suggestion-card:active {
+    transform: translateY(0);
+}
+
+/* Compact icon styles */
+.card-icon-wrapper {
+    position: relative;
+    width: 32px;
+    height: 32px;
 }
 
 .card-icon {
-    width: 36px;
-    height: 36px;
+    width: 100%;
+    height: 100%;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 14px;
     color: white;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
 }
 
-.card-icon.voice { background: linear-gradient(135deg, #3498db, #2980b9); }
-.card-icon.theme { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
-.card-icon.delete { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-.card-icon.keyboard { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+.card-icon::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0) 100%);
+    z-index: 2;
+}
 
+.card-icon.voice { background: linear-gradient(135deg, #3498db, #2c80b5); }
+.card-icon.theme { background: linear-gradient(135deg, #9b59b6, #8e4dad); }
+.card-icon.delete { background: linear-gradient(135deg, #e74c3c, #d44c3c); }
+.card-icon.keyboard { background: linear-gradient(135deg, #2ecc71, #27ad60); }
+.card-icon.chat { background: linear-gradient(135deg, #f39c12, #e58e0b); }
+.card-icon.settings { background: linear-gradient(135deg, #34495e, #2c3e50); }
+
+/* Compact content */
 .card-content {
-    flex: 1;
+    width: 100%;
 }
 
 .card-content h5 {
-    margin: 0 0 4px 0;
-    font-size: 13px;
+    margin: 0 0 3px 0;
+    font-size: 12px;
     color: var(--body-color);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .card-content p {
     margin: 0;
-    font-size: 11px;
+    font-size: 10px;
     color: var(--detail-font-color);
     opacity: 0.8;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Active state */
+.suggestion-card.active {
+    background: rgba(var(--theme-color-rgb), 0.12);
+    border-color: rgba(var(--theme-color-rgb), 0.3);
+    box-shadow: 0 4px 8px rgba(var(--theme-color-rgb), 0.15);
+}
+
+/* Indicator dot for active state */
+.suggestion-card.active::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 6px;
+    height: 6px;
+    background: var(--theme-color);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.2); }
+}
+
+/* Arrow indicator for horizontal scrolling */
+.suggestion-cards-container {
+    position: relative;
+}
+
+.scroll-indicator {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background: rgba(var(--input-bg-rgb), 0.9);
+    border: 1px solid rgba(var(--border-color-rgb), 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--body-color);
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.scroll-indicator:hover {
+    opacity: 1;
+    background: rgba(var(--theme-color-rgb), 0.1);
+    border-color: rgba(var(--theme-color-rgb), 0.3);
+}
+
+.scroll-indicator.left {
+    left: -8px;
+}
+
+.scroll-indicator.right {
+    right: -8px;
+}
+
+/* Dark mode adjustments */
+.dark-mode .smart-suggestions {
+    background: rgba(40, 40, 40, 0.7);
+}
+
+.dark-mode .suggestion-card {
+    background: rgba(50, 50, 50, 0.8);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .suggestion-card:hover {
+    background: rgba(var(--theme-color-rgb), 0.15);
+    border-color: rgba(var(--theme-color-rgb), 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .smart-suggestions {
+        max-height: 110px !important;
+        padding: 8px 12px;
+    }
+    
+    .suggestion-card {
+        width: 130px;
+        padding: 8px 10px;
+    }
+    
+    .card-icon-wrapper {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .card-content h5 {
+        font-size: 11px;
+    }
+    
+    .card-content p {
+        font-size: 9px;
+    }
 }
 
 /* Typing Indicator */
 .typing-indicator {
-    padding: 15px 20px;
+    padding: 2px 2px;
     background: rgba(var(--theme-bg-color-rgb), 0.9);
     border-top: 1px solid rgba(var(--border-color-rgb), 0.2);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
     color: var(--detail-font-color);
     font-size: 13px;
     opacity: 0;
@@ -778,28 +932,7 @@
     z-index: 2;
 }
 
-.notification-bubble {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    width: 22px;
-    height: 22px;
-    background: #e74c3c;
-    border: 2px solid var(--theme-bg-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: bold;
-    color: white;
-    animation: notificationPulse 2s infinite;
-}
 
-@keyframes notificationPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
 
 .launcher-tooltip {
     position: absolute;
@@ -820,15 +953,6 @@
     opacity: 1;
 }
 
-.launcher-tooltip span {
-    display: block;
-    font-weight: 600;
-}
-
-.launcher-tooltip small {
-    font-size: 12px;
-    opacity: 0.8;
-}
 
 .launcher-glow {
     position: absolute;
@@ -870,8 +994,8 @@
         width: calc(100% - 30px);
         height: 90vh;
         bottom: 30px;
-        right: 20px;
-        left: 20px;
+        right: 10px;
+        left:15px;
     }
     
     .suggestion-cards {
