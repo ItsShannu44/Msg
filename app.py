@@ -431,12 +431,14 @@ def get_recent_chats():
     ''', (current_user.id, current_user.id, current_user.id))
 
     recent_chats = cursor.fetchall()
-    conn.close()
-
-    # Convert profile pictures to URLs
+    
+    # Get online status for each user
     recent_chats_with_pictures = []
     for chat in recent_chats:
         user_id, username, profile_picture, last_message_time = chat
+
+        # Check if user is online
+        is_online = user_id in online_users
 
         # If profile_picture exists, generate a URL; otherwise, use a default image
         if profile_picture:
@@ -448,9 +450,11 @@ def get_recent_chats():
             "user_id": user_id,
             "username": username,
             "profile_picture": profile_picture_url,
-            "last_message_time": last_message_time
+            "last_message_time": last_message_time,
+            "is_online": is_online  # Add online status
         })
 
+    conn.close()
     return jsonify(recent_chats_with_pictures)
 
 #--------------------------------------------------------------------BACKUP MSG-------
