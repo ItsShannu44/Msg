@@ -4,6 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KwikChat</title>
+    <style id="critical-theme-styles">
+        :root {
+            --theme-color: #144890;
+            --theme-glow: #006aff;
+            --bg-color: rgba(240, 240, 240, 0.59);
+            --voice-bg-color: rgba(255, 255, 255, 0.732);
+            --glow-color: #006aff;
+            --wave-color: linear-gradient(135deg, #4a22bd, #22bd9d);
+            --voice-bg: linear-gradient(135deg, #4a22bd, #22bd9d);
+            --recents-bg: #e5ecef;
+            --receivers-chat: #dfdfdf;
+            --black-white: #000000;
+            --txt-clr: #000;
+            --grey-clr: #a2a2a2;
+            --body-bg-color: #e5ecef;
+            --theme-bg-color: #ecfffe;
+            --settings-icon-hover: #9fa7ac;
+            --developer-color: #f9fafb;
+            --input-bg: #ffffff;
+            --input-border: rgba(124, 122, 122, 0.571);
+            --input-chat-color: #a2a2a2;
+            --border-color: #eef2f4;
+            --body-color: #273346;
+            --settings-icon-color: #c1c7cd;
+            --msg-message: #969eaa;
+            --chat-text-bg: #f1f2f6;
+            --msg-date: #c0c7d2;
+            --button-bg-color: #5e5d5dc0;
+            --button-color: #144890;
+            --detail-font-color: #919ca2;
+            --msg-hover-bg: rgba(238, 242, 244, 0.4);
+            --active-conversation-bg: rgba(206, 208, 209, 0.4);
+            --conversation-bg: url('/static/Pattern_1.png');
+            --datetime-color: rgb(149, 149, 149);
+        }
+        
+        /* Apply dark mode immediately if saved in localStorage */
+        body.dark-mode {
+            --bg-color: rgba(18, 18, 18, 0.9);
+            --voice-bg-color: rgba(32, 32, 32, 0.819);
+            --glow-color: var(--theme-glow);
+            --wave-color: linear-gradient(135deg, #4a22bd, #22bd9d);
+            --voice-bg: linear-gradient(135deg, #4a22bd, #22bd9d);
+            --recents-bg: #27292d;
+            --receivers-chat: #716d6dd6;
+            --black-white: #ffffff;
+            --txt-clr: #fff;
+            --grey-clr: #6f7073;
+            --body-bg-color: #1d1d1d;
+            --theme-bg-color: #27292d;
+            --border-color: #323336;
+            --body-color: #d1d1d2;
+            --active-conversation-bg: rgba(24, 29, 35, 0.422);
+            --msg-hover-bg: rgba(47, 50, 56, 0.54);
+            --chat-text-bg: #383b40;
+            --chat-text-color: #b5b7ba;
+            --input-border: rgba(0, 0, 0, 0.404);
+            --msg-date: #626466;
+            --msg-message: var(--msg-date);
+            --input-bg: #2f3236;
+            --settings-icon-color: #7c7e80;
+            --developer-color: var(--border-color);
+            --button-bg-color: #5e5d5dc0;
+            --button-color: var(--body-color);
+            --input-chat-color: #6f7073;
+            --detail-font-color: var(--input-chat-color);
+            --conversation-bg: url('/static/Pattern_0.png');
+            --datetime-color: rgb(233, 233, 233);
+        }
+        
+        /* Apply theme colors immediately if saved in localStorage */
+        [data-theme="purple"] {
+            --theme-color: #8357dc;
+            --theme-glow: #9f7aea;
+            --button-color: #8357dc;
+            --button-bg-color: rgba(159, 122, 234, 0.12);
+        }
+        
+        [data-theme="green"] {
+            --theme-color: #149086;
+            --theme-glow: #38b2ac;
+            --button-color: #149086;
+            --button-bg-color: rgba(56, 178, 171, 0.15);
+        }
+        
+        [data-theme="orange"] {
+            --theme-color: #a65621;
+            --theme-glow: #ed8936;
+            --button-color: #a65621;
+            --button-bg-color: rgba(237, 137, 54, 0.12);
+        }
+        
+        /* Set initial theme based on localStorage (prevent flicker) */
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body.dark-mode {
+            background-color: var(--body-bg-color);
+            color: var(--body-color);
+        }
+    </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='chatbot.css') }}">
     <link rel="website icon" type="png" href="/static/KwikChat_logo.png">
@@ -131,16 +233,26 @@
                             <img id="chat-profile-pic" src="/static/default_profile.jpg" alt="Profile Picture" class="profile-pic">
                             <h2 id="chat-with">Select a user to chat</h2>
                         </div>
+                        
+                        <div class="mobile-search-container" id="mobileSearchContainer">
+                            <input type="text" id="mobile-conversation-search" placeholder="Search in conversation..." class="mobile-search-input">
+                            <button class="close-search-btn" id="closeMobileSearch">✕</button>
+                        </div>
+                        
                         <div class="online-menu">
                             <p id="user-online-status"></p> 
                             <div class="chat-menu">
+                                <!-- Add search icon button -->
+                                <button class="search-toggle" id="mobileSearchToggle" title="Search in conversation">
+                                    <i class="fas fa-search"></i>
+                                </button>
                                 <button class="menu-toggle" id="three-dots">⋮</button>
                                 <div class="menu-dropdown" id="menuDropdown">
                                     <a id="clear-chat-button" onclick="clearChat()">Clear Chat</a>
                                 </div>
                             </div> 
                         </div>
-                    </div>   
+                    </div>
                     
                     <div class="conversation-area" id="conversation-area">
                         <div class="chatArea">
@@ -370,18 +482,43 @@
     <button class="chatbot-launcher" id="chatbotLauncher">
         <div class="launcher-icon">
             <i class="fas fa-robot"></i>
-            <div class="notification-bubble" id="chatbotNotification">
-                <span>1</span>
-            </div>
         </div>
-        <div class="launcher-tooltip">
-            <span>KwikAI Assistant</span>
-            <small>Click to chat</small>
-        </div>
+            <!-- <div class="launcher-tooltip">
+                <span>KwikAI Assistant</span>
+                <small>Click to chat</small>
+            </div> -->
         <div class="launcher-glow"></div>
     </button>
 
     <script>
+        ///////////////REDUCE THEME FLICKER//////////////////////////
+        // Apply theme immediately to prevent flicker
+        (function() {
+            'use strict';
+            
+            // Check localStorage for saved theme
+            const savedTheme = localStorage.getItem('themeColor');
+            const isDarkMode = localStorage.getItem('darkMode') === 'enabled';
+            
+            // Apply theme classes immediately
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            }
+            
+            if (isDarkMode) {
+                document.documentElement.classList.add('dark-mode');
+            }
+            
+            // Remove the critical styles after page loads (optional)
+            window.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    const criticalStyles = document.getElementById('critical-theme-styles');
+                    if (criticalStyles) {
+                        criticalStyles.disabled = true;
+                    }
+                }, 100);
+            });
+        })();
         /////////////////////////////////////////////////////////////////////////
         const socket = io(); // Initialize Socket.IO
         let currentRecipientId = {{ default_recipient_id if default_recipient_id else 'null' }};
