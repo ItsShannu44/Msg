@@ -85,13 +85,8 @@
         rgba(var(--theme-glow-rgb), 0.6) 50%,
         transparent 100%);
     opacity: 0.1;
-    animation: gradientShift 8s ease infinite;
 }
 
-@keyframes gradientShift {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(20px); }
-}
 
 .chatbot-header-content {
     position: relative;
