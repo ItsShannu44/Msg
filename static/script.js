@@ -995,3 +995,44 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
+//////////////////////////////////ONLINE STATUS IN RECENTS/////////////
+
+if (typeof socket !== 'undefined') {
+    socket.on("user_online", (data) => {
+        if (data.user_id === currentRecipientId) {
+            updateStatusElement(data.user_id, true);
+        }
+        
+        updateOnlineStatusInRecentChats(data.user_id, true);
+    });
+
+    socket.on("user_offline", (data) => {
+        if (data.user_id === currentRecipientId) {
+            updateStatusElement(data.user_id, false);
+        }
+        updateOnlineStatusInRecentChats(data.user_id, false);
+    });
+}
+
+function updateOnlineStatusInRecentChats(userId, isOnline) {
+    const chatItem = document.querySelector(`#recent-chats li[data-user-id="${userId}"]`);
+    if (chatItem) {
+        chatItem.dataset.online = isOnline;
+        
+        const profilePicContainer = chatItem.querySelector('.profile-pic-container');
+        if (profilePicContainer) {
+            let onlineIndicator = profilePicContainer.querySelector('.online-indicator');
+            
+            if (isOnline && !onlineIndicator) {
+                onlineIndicator = document.createElement('span');
+                onlineIndicator.className = 'online-indicator';
+                onlineIndicator.title = 'Online';
+                profilePicContainer.prepend(onlineIndicator);
+            } else if (!isOnline && onlineIndicator) {
+                onlineIndicator.remove();
+            }
+        }
+    }
+}
