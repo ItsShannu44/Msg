@@ -179,21 +179,28 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 //////////////////////////////////////////////////////////////////////seacrch in conversation/////////////////////////////////
 
+// Update the existing conversation search event listener
 document.getElementById('conversation-search').addEventListener('input', function () {
     let searchQuery = this.value.toLowerCase();
     let messages = document.querySelectorAll('#conversation-area .msg .msg-message');
     let firstMatch = null;
-
+    
+    // Sync with mobile search input if it exists
+    const mobileSearchInput = document.getElementById('mobile-conversation-search');
+    if (mobileSearchInput) {
+        mobileSearchInput.value = this.value;
+    }
+    
     messages.forEach(msg => {
         let originalText = msg.textContent;
         let lowerText = originalText.toLowerCase();
-
+        
         if (searchQuery && lowerText.includes(searchQuery)) {
             // Highlight matching text
             let highlightedText = originalText.replace(new RegExp(`(${searchQuery})`, 'gi'), 
                 `<span class="highlight">$1</span>`);
             msg.innerHTML = highlightedText;
-
+            
             // Store the first matching element to scroll to
             if (!firstMatch) {
                 firstMatch = msg;
@@ -203,10 +210,136 @@ document.getElementById('conversation-search').addEventListener('input', functio
             msg.innerHTML = originalText;
         }
     });
-
+    
     // Scroll to the first match
     if (firstMatch) {
         firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+});
+
+
+/////////////////////////////CONVERSATION SEARCH IN MOBILE//////////////////////////
+
+// Mobile Search Functionality
+function setupMobileSearch() {
+    const mobileSearchToggle = document.getElementById('mobileSearchToggle');
+    const mobileSearchContainer = document.getElementById('mobileSearchContainer');
+    const mobileSearchInput = document.getElementById('mobile-conversation-search');
+    const closeSearchBtn = document.getElementById('closeMobileSearch');
+    const conversationSearch = document.getElementById('conversation-search');
+    
+    if (!mobileSearchToggle || !mobileSearchContainer) return;
+    
+    // Toggle search bar visibility
+    mobileSearchToggle.addEventListener('click', function() {
+        mobileSearchContainer.classList.add('active');
+        mobileSearchInput.focus();
+    });
+    
+    // Close search bar
+    closeSearchBtn.addEventListener('click', function() {
+        mobileSearchContainer.classList.remove('active');
+        mobileSearchInput.value = '';
+        clearSearchHighlights();
+    });
+    
+    // Search functionality for mobile input
+    mobileSearchInput.addEventListener('input', function() {
+        let searchQuery = this.value.toLowerCase();
+        let messages = document.querySelectorAll('#conversation-area .msg .msg-message');
+        let firstMatch = null;
+        
+        messages.forEach(msg => {
+            let originalText = msg.textContent;
+            let lowerText = originalText.toLowerCase();
+            
+            if (searchQuery && lowerText.includes(searchQuery)) {
+                // Highlight matching text
+                let highlightedText = originalText.replace(new RegExp(`(${searchQuery})`, 'gi'), 
+                    `<span class="highlight">$1</span>`);
+                msg.innerHTML = highlightedText;
+                
+                // Store the first matching element to scroll to
+                if (!firstMatch) {
+                    firstMatch = msg;
+                }
+            } else {
+                // Restore original text if search is cleared
+                msg.innerHTML = originalText;
+            }
+        });
+        
+        // Scroll to the first match
+        if (firstMatch) {
+            firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+    
+    // Close search when pressing Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && mobileSearchContainer.classList.contains('active')) {
+            mobileSearchContainer.classList.remove('active');
+            mobileSearchInput.value = '';
+            clearSearchHighlights();
+        }
+    });
+    
+    // Sync desktop and mobile search inputs
+    if (conversationSearch) {
+        conversationSearch.addEventListener('input', function() {
+            mobileSearchInput.value = this.value;
+        });
+        
+        mobileSearchInput.addEventListener('input', function() {
+            conversationSearch.value = this.value;
+        });
+    }
+}
+
+// Function to clear search highlights
+function clearSearchHighlights() {
+    document.querySelectorAll('#conversation-area .msg .msg-message .highlight').forEach(highlight => {
+        const parent = highlight.parentNode;
+        parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+        parent.normalize();
+    });
+}
+
+// Initialize mobile search on DOM load
+document.addEventListener('DOMContentLoaded', function() {
+    setupMobileSearch();
+    
+    // Hide detail area search on mobile (since we have it in header)
+    if (window.innerWidth <= 768) {
+        const detailSearch = document.getElementById('conversation-search');
+        if (detailSearch) {
+            detailSearch.style.display = 'none';
+        }
+    }
+});
+
+// Update on window resize
+window.addEventListener('resize', function() {
+    const detailSearch = document.getElementById('conversation-search');
+    const mobileSearchContainer = document.getElementById('mobileSearchContainer');
+    
+    if (window.innerWidth <= 768) {
+        // On mobile: hide detail search, show mobile search icon
+        if (detailSearch) {
+            detailSearch.style.display = 'none';
+        }
+        // Ensure mobile search is hidden by default
+        if (mobileSearchContainer) {
+            mobileSearchContainer.classList.remove('active');
+        }
+    } else {
+        // On desktop: show detail search, hide mobile search
+        if (detailSearch) {
+            detailSearch.style.display = 'block';
+        }
+        if (mobileSearchContainer) {
+            mobileSearchContainer.classList.remove('active');
+        }
     }
 });
 
