@@ -30,7 +30,7 @@ class PremiumChatbotAssistant {
         this.loadPreferences();
         
         // Event listeners
-        this.launcher.addEventListener('click', () => this.toggleChatbot());
+        this.launcher.addEventListener('click', () => this.toggle   ());
         this.closeBtn.addEventListener('click', () => this.closeChatbot());
         this.clearBtn.addEventListener('click', () => this.clearChat());
         this.settingsBtn.addEventListener('click', () => this.showSettings());
@@ -66,9 +66,8 @@ class PremiumChatbotAssistant {
         document.getElementById('chatbotEmoji').addEventListener('click', () => this.showEmojiPicker());
         
         // Add welcome message
-        this.showWelcomeMessage();
-        
-        // Show notification
+        // this.showWelcomeMessage();
+
         this.checkForNotifications();
         
         // Auto-focus input when opened
@@ -79,7 +78,27 @@ class PremiumChatbotAssistant {
         });
     }
     
-
+        setupOutsideClickDetection() {
+        document.addEventListener('click', (e) => {
+            // If chatbot is open
+            if (this.isOpen) {
+                // Check if click is outside chatbot container and not on launcher
+                const isClickInsideChatbot = this.container.contains(e.target);
+                const isClickOnLauncher = this.launcher.contains(e.target);
+                
+                // Close if click is outside AND not on launcher
+                if (!isClickInsideChatbot && !isClickOnLauncher) {
+                    this.closeChatbot();
+                }
+            }
+        });
+        
+        // Prevent clicks inside chatbot from closing it
+        this.container.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+    
 
     setupThemeIntegration() {
         // Watch for theme changes
@@ -121,6 +140,7 @@ class PremiumChatbotAssistant {
             this.container.classList.add('active');
             this.hideNotification();
             this.recordInteraction('open');
+            this.showWelcomeMessage();
         } else {
             this.container.classList.remove('active');
         }
@@ -141,7 +161,7 @@ class PremiumChatbotAssistant {
     }
     
     showWelcomeMessage() {
-        if (this.messageHistory.length === 0) {
+        this.messagesContainer.innerHTML = ''; 
             const welcomeHtml = `
                 <div class="welcome-card">
                     <div class="welcome-icon">
@@ -157,10 +177,15 @@ class PremiumChatbotAssistant {
                 </div>
             `;
             this.messagesContainer.innerHTML = welcomeHtml;
-        } else {
-            this.renderHistory();
+            // If there's history, add it after welcome message
+        if (this.messageHistory.length > 0) {
+            setTimeout(() => {
+                this.renderHistory();
+            }, 100);
         }
-    }
+        this.scrollToBottom();
+        }
+
     
     async sendMessage() {
         const message = this.input.value.trim();
@@ -554,8 +579,8 @@ class PremiumChatbotAssistant {
     }
     
     renderHistory() {
-        this.messagesContainer.innerHTML = '';
-        this.showWelcomeMessage();
+        // this.messagesContainer.innerHTML = '';
+        // this.showWelcomeMessage();
         
         this.messageHistory.forEach(msg => {
             this.addMessage(msg.user, 'user');
