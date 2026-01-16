@@ -597,7 +597,7 @@ cursor: pointer;
   width: auto;
 }
 .online-menu{
-    width:80px;
+    width:100px;
     justify-content: space-between;
     text-align: center;
     align-items: center;
@@ -1965,4 +1965,72 @@ text-align: center;
     .mobile-search-container.active ~ .chat-profile {
         display: none;
     }
+}
+
+/* Online status indicator styles */
+.profile-pic-container {
+    position: relative;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background-color: #1ccb21;
+    border-radius: 50%;
+    border: 2px solid var(--theme-bg-color);
+    z-index: 1;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+/* For the chat header online status (keep existing) */
+#user-online-status.online::before {
+    content: "●";
+    color: #1ccb21;
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+#user-online-status.offline::before {
+    content: "●";
+    color: #ff5252;
+    margin-right: 5px;
+    font-size: 12px;
+}
+
+/* Update the profile pic styles for recent chats */
+#recent-chats li img.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+/* Add some styling for the chat list items */
+#recent-chats li {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#recent-chats li:hover {
+    background-color: var(--msg-hover-bg);
+}
+
+#recent-chats li.selected {
+    background-color: var(--active-conversation-bg);
+    border-left: 3px solid var(--theme-color);
+}
+
+.username-text {
+    flex-grow: 1;
+    font-size: 16px;
+    font-weight: 500;
 }
