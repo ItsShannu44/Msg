@@ -726,12 +726,18 @@
 
         function updateStatusElement(userId, isOnline) {
             const statusElement = document.getElementById('user-online-status');
-            if (isOnline) {
-                statusElement.innerText = " online";
-                statusElement.style.color = "green";
-            } else {
-                statusElement.innerText = " offline";
-                statusElement.style.color = "red";
+            if (statusElement) {
+                if (isOnline) {
+                    statusElement.innerText = " online";
+                    statusElement.style.color = "green";
+                    statusElement.classList.add('online');
+                    statusElement.classList.remove('offline');
+                } else {
+                    statusElement.innerText = " offline";
+                    statusElement.style.color = "red";
+                    statusElement.classList.add('offline');
+                    statusElement.classList.remove('online');
+                }
             }
         }
 
@@ -837,30 +843,46 @@
                 recentChatsArea.innerHTML = '';
 
                 recentChats.forEach((chat) => {
-                    const { user_id, username, profile_picture } = chat;
+                    const { user_id, username, profile_picture, is_online } = chat;
 
                     // Create list item for chat
                     const chatItem = document.createElement('li');
                     chatItem.classList.add('chat-item');
                     chatItem.dataset.userId = user_id;
+                    chatItem.dataset.online = is_online;
                     chatItem.onclick = () => {
                         startChat(user_id, username);
                         localStorage.setItem("selectedUserId", user_id);
                         updateSelectedChat();
                     };       
 
+                    // Create profile picture container with online indicator
+                    const profilePicContainer = document.createElement('div');
+                    profilePicContainer.className = 'profile-pic-container';
+                    
                     // Create profile picture element
                     const profilePic = document.createElement('img');
                     profilePic.src = profile_picture || '/static/default_profile.jpg';
                     profilePic.alt = `${username}'s profile picture`;
                     profilePic.classList.add('profile-pic');
 
-                    // Create username text element
+                    // Create online status indicator
+                    if (is_online) {
+                        const onlineIndicator = document.createElement('span');
+                        onlineIndicator.className = 'online-indicator';
+                        onlineIndicator.title = 'Online';
+                        profilePicContainer.appendChild(onlineIndicator);
+                    }
+
+                    profilePicContainer.appendChild(profilePic);
+
+                    // Create username text element with online status
                     const usernameText = document.createElement('span');
+                    usernameText.className = 'username-text';
                     usernameText.innerText = username;
 
                     // Append elements
-                    chatItem.appendChild(profilePic);
+                    chatItem.appendChild(profilePicContainer);
                     chatItem.appendChild(usernameText);
                     recentChatsArea.appendChild(chatItem);
                 });
@@ -875,7 +897,6 @@
                 console.error("Error fetching recent chats:", error);
             }
         }
-
         // Function to update selected chat after list reload
         function updateSelectedChat() {
             let selectedUserId = localStorage.getItem("selectedUserId");
