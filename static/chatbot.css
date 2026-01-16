@@ -37,7 +37,7 @@
 /* Chatbot Container with Glass Effect */
 .chatbot-container {
     position: fixed;
-    bottom: 90px;
+    bottom: 50px;
     right: 25px;
     width: 380px;
     height: 580px;
@@ -747,7 +747,7 @@
 .chatbot-launcher {
     position: fixed;
     bottom: 25px;
-    right: 25px;
+    right: 55px;
     width: 70px;
     height: 70px;
     border-radius: 50%;
@@ -765,7 +765,7 @@
 }
 
 .chatbot-launcher:hover {
-    transform: scale(1.1) rotate(10deg);
+    transform: scale(1.1) rotate(3deg);
     box-shadow: 
         0 15px 35px rgba(var(--theme-color-rgb), 0.4),
         0 0 0 1px rgba(255, 255, 255, 0.2);
