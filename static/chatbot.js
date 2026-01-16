@@ -11,7 +11,6 @@ class PremiumChatbotAssistant {
         this.closeBtn = document.getElementById('chatbotClose');
         this.clearBtn = document.getElementById('chatbotClear');
         this.settingsBtn = document.getElementById('chatbotSettings');
-        this.notificationBadge = document.getElementById('chatbotNotification');
         this.typingIndicator = document.getElementById('typingIndicator');
         
         this.isOpen = false;
@@ -67,7 +66,7 @@ class PremiumChatbotAssistant {
         document.getElementById('chatbotEmoji').addEventListener('click', () => this.showEmojiPicker());
         
         // Add welcome message
-        // this.showWelcomeMessage();
+        this.showWelcomeMessage();
 
         this.checkForNotifications();
         
@@ -100,6 +99,35 @@ class PremiumChatbotAssistant {
         });
     }
     
+    // Add this to your chatbot initialize() method
+    setupSmartSuggestionsScrolling() {
+        const cardsContainer = document.querySelector('.suggestion-cards');
+        const leftArrow = document.querySelector('.scroll-indicator.left');
+        const rightArrow = document.querySelector('.scroll-indicator.right');
+        
+        if (cardsContainer && leftArrow && rightArrow) {
+            leftArrow.addEventListener('click', () => {
+                cardsContainer.scrollBy({ left: -150, behavior: 'smooth' });
+            });
+            
+            rightArrow.addEventListener('click', () => {
+                cardsContainer.scrollBy({ left: 150, behavior: 'smooth' });
+            });
+            
+            // Show/hide arrows based on scroll position
+            const updateArrows = () => {
+                const scrollLeft = cardsContainer.scrollLeft;
+                const maxScroll = cardsContainer.scrollWidth - cardsContainer.clientWidth;
+                
+                leftArrow.style.opacity = scrollLeft > 0 ? '0.7' : '0.2';
+                rightArrow.style.opacity = scrollLeft < maxScroll - 5 ? '0.7' : '0.2';
+            };
+            
+            cardsContainer.addEventListener('scroll', updateArrows);
+            updateArrows();
+        }
+    }
+
 
     setupThemeIntegration() {
         // Watch for theme changes
@@ -170,12 +198,6 @@ class PremiumChatbotAssistant {
                 </div>
                 <h4>Welcome to KwikAI! 🤖</h4>
                 <p>Your intelligent assistant for KwikChat. I can help you with messaging, themes, shortcuts, and more!</p>
-                <div class="welcome-features">
-                    <span><i class="fas fa-check-circle"></i> Voice Assistance</span>
-                    <span><i class="fas fa-check-circle"></i> Theme Help</span>
-                    <span><i class="fas fa-check-circle"></i> Quick Tips</span>
-                    <span><i class="fas fa-check-circle"></i> Click outside to close</span>
-                </div>
             </div>
         `;
         this.messagesContainer.innerHTML = welcomeHtml;
@@ -521,17 +543,6 @@ class PremiumChatbotAssistant {
         localStorage.setItem('kwikaiLastSeen', now);
     }
     
-    showNotification() {
-        this.notificationBadge.style.display = 'flex';
-        this.notificationBadge.querySelector('span').textContent = '1';
-        
-        // Pulse animation
-        this.notificationBadge.style.animation = 'notificationPulse 2s infinite';
-    }
-    
-    hideNotification() {
-        this.notificationBadge.style.display = 'none';
-    }
     
     saveToHistory(userMessage, botResponse) {
         this.messageHistory.push({
@@ -600,29 +611,8 @@ class PremiumChatbotAssistant {
         return div.innerHTML;
     }
     
+    // Public API for other parts of the app
     showHelp(topic) {
-        // Check if we're on mobile with conversation open
-        if (this.isMobileView) {
-            const conversationArea = document.querySelector('.conversation-area');
-            const chatArea = document.querySelector('.chat-area');
-            
-            let isConversationVisible = false;
-            if (conversationArea) {
-                const style = window.getComputedStyle(conversationArea);
-                isConversationVisible = style.display !== 'none' && conversationArea.offsetWidth > 0;
-            }
-            
-            if (chatArea && chatArea.offsetWidth > 0) {
-                isConversationVisible = true;
-            }
-            
-            if (isConversationVisible) {
-                // Show a mobile-friendly notification instead
-                this.showMobileNotification("Chatbot is hidden when chat is active. Close chat to use AI help.");
-                return;
-            }
-        }
-        
         this.toggleChatbot();
         setTimeout(() => {
             this.input.value = topic;
@@ -798,176 +788,4 @@ styleSheet.textContent = integrationStyles;
 document.head.appendChild(styleSheet);
 
 
-//==========================RESPONSIVE============================
 
-
-setupMobileResponsiveness() {
-        // Check if we're on mobile/tablet (≤768px)
-        this.checkMobileView();
-        
-        // Listen for window resize
-        window.addEventListener('resize', () => this.checkMobileView());
-        
-        // Listen for conversation area opening on mobile
-        this.setupConversationAreaListener();
-    }
-    
-    checkMobileView() {
-        // Check if screen width is ≤768px
-        this.isMobileView = window.innerWidth <= 768;
-        
-        // If on mobile and chatbot is open, check if conversation area is visible
-        if (this.isMobileView && this.isOpen) {
-            this.checkAndHideForConversation();
-        }
-    }
-     setupConversationAreaListener() {
-        // Check for conversation area element
-        const conversationArea = document.querySelector('.conversation-area');
-        if (conversationArea) {
-            // Use MutationObserver to detect when conversation area becomes visible
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.attributeName === 'class' || mutation.attributeName === 'style') {
-                        this.checkAndHideForConversation();
-                    }
-                });
-            });
-            
-            observer.observe(conversationArea, {
-                attributes: true,
-                attributeFilter: ['class', 'style']
-            });
-            
-            // Also check for any buttons/triggers that might open conversation area
-            document.addEventListener('click', (e) => {
-                // Check if click is on something that might open conversation area
-                const target = e.target;
-                const isConversationOpener = 
-                    target.closest('.conversation-item') || 
-                    target.closest('.chat-header') ||
-                    target.closest('[data-action="open-chat"]');
-                
-                if (isConversationOpener && this.isMobileView) {
-                    setTimeout(() => {
-                        this.checkAndHideForConversation();
-                    }, 100); // Small delay to allow UI to update
-                }
-            });
-        }
-    }
-    
-    checkAndHideForConversation() {
-        // Only proceed if we're on mobile view
-        if (!this.isMobileView) return;
-        
-        // Check if conversation area is visible/opened
-        const conversationArea = document.querySelector('.conversation-area');
-        const chatArea = document.querySelector('.chat-area');
-        
-        // Different ways conversation area might be "opened":
-        // 1. Has a specific class (like 'active', 'expanded', 'visible')
-        // 2. Is visible (display not 'none')
-        // 3. Has width > 0
-        // 4. Chat area is visible
-        
-        let isConversationVisible = false;
-        
-        if (conversationArea) {
-            const style = window.getComputedStyle(conversationArea);
-            isConversationVisible = 
-                conversationArea.classList.contains('active') ||
-                conversationArea.classList.contains('expanded') ||
-                conversationArea.classList.contains('visible') ||
-                conversationArea.classList.contains('open') ||
-                style.display !== 'none' &&
-                style.visibility !== 'hidden' &&
-                conversationArea.offsetWidth > 0;
-        }
-        
-        // Also check if chat area is visible
-        if (chatArea) {
-            const style = window.getComputedStyle(chatArea);
-            if (style.display !== 'none' && style.visibility !== 'hidden' && chatArea.offsetWidth > 0) {
-                isConversationVisible = true;
-            }
-        }
-        
-        // If conversation area is visible and chatbot is open, hide chatbot
-        if (isConversationVisible && this.isOpen) {
-            this.closeChatbot();
-        }
-    
-    toggleChatbot() {
-        // Check if we should allow toggling (not on mobile with conversation open)
-        if (this.isMobileView) {
-            const conversationArea = document.querySelector('.conversation-area');
-            const chatArea = document.querySelector('.chat-area');
-            
-            let isConversationVisible = false;
-            if (conversationArea) {
-                const style = window.getComputedStyle(conversationArea);
-                isConversationVisible = style.display !== 'none' && 
-                                      style.visibility !== 'hidden' && 
-                                      conversationArea.offsetWidth > 0;
-            }
-            
-            if (chatArea) {
-                const style = window.getComputedStyle(chatArea);
-                if (style.display !== 'none' && style.visibility !== 'hidden' && chatArea.offsetWidth > 0) {
-                    isConversationVisible = true;
-                }
-            }
-            
-            // Don't open chatbot if conversation is visible on mobile
-            if (isConversationVisible && !this.isOpen) {
-                // Show message or just return
-                console.log("Chatbot cannot be opened when conversation is active on mobile");
-                return;
-            }
-        }
-        
-        this.isOpen = !this.isOpen;
-        if (this.isOpen) {
-            this.container.classList.add('active');
-            this.hideNotification();
-            this.recordInteraction('open');
-            this.showWelcomeMessage();
-        } else {
-            this.container.classList.remove('active');
-        }
-    }
-
-    
-    
-    showMobileNotification(message) {
-        // Create a temporary notification for mobile users
-        const notification = document.createElement('div');
-        notification.className = 'mobile-chatbot-notification';
-        notification.textContent = message;
-        notification.style.cssText = `
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(var(--theme-color-rgb), 0.9);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            z-index: 9999;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            max-width: 90%;
-            text-align: center;
-            animation: fadeInOut 3s ease;
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Remove after 3 seconds
-        setTimeout(() => {
-            notification.style.animation = 'fadeOut 0.5s ease forwards';
-            setTimeout(() => notification.remove(), 500);
-        }, 2500);
-    }
-}
