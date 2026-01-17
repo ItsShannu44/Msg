@@ -1217,6 +1217,10 @@ text-align: center;
         flex-shrink: 0;
         height: 80px;
        }   
+       .chat-menu{
+        width: max-content;
+        display: flex;
+       }
 }
   
   /* For very small screens like iPhone SE */
