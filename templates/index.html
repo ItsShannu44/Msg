@@ -108,10 +108,12 @@
     </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='chatbot.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='Assistant.css') }}">
     <link rel="website icon" type="png" href="/static/KwikChat_logo.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
     <script src="{{ url_for('static', filename='chatbot.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='Assistant.js') }}" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
 <body>
@@ -175,6 +177,41 @@
                 <a href="/"><img src="/static/KwikChat_logo.png" alt="KwikChat_logo"></a>
             </div>
             <div class="user-settings">
+                <div class="accessibility-toggle">
+                    <button class="accessibility-btn" id="accessibilityBtn" title="Accessibility Mode (Alt+A)" onclick="window.kwikAccessibility.toggleAccessibility()">
+                        <i class="fas fa-universal-access"></i>
+                        <span class="accessibility-status"></span>
+                    </button>
+                    <div class="accessibility-panel" id="accessibilityPanel">
+                        <div class="panel-header">
+                            <h4>Accessibility Mode</h4>
+                            <button class="panel-close" id="closeAccessibilityPanel">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="panel-status">
+                            <div class="status-indicator">
+                                <span class="indicator-dot"></span>
+                                <span class="indicator-text" id="accessibilityStatusText">Off</span>
+                            </div>
+                        </div>
+                        <div class="panel-content">
+                            <div class="voice-feedback">
+                                <div class="feedback-text" id="accessibilityFeedback">Ready</div>
+                            </div>
+                            <div class="commands-list">
+                                <h5>Voice Commands:</h5>
+                                <ul>
+                                    <li><strong>Open [username]</strong> - Open chat</li>
+                                    <li><strong>Type</strong> - Type message</li>
+                                    <li><strong>Send</strong> - Send message</li>
+                                    <li><strong>Read previous</strong> - Read last 3 messages</li>
+                                    <li><strong>Turn off</strong> - Disable accessibility</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="dark-light">
                     <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
@@ -489,6 +526,7 @@
             </div> -->
         <div class="launcher-glow"></div>
     </button>
+
 
     <script>
         ///////////////REDUCE THEME FLICKER//////////////////////////
