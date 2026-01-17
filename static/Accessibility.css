@@ -1,0 +1,237 @@
+/* Accessibility Toggle Button Styles */
+.accessibility-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.accessibility-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--theme-bg-color);
+    border: 2px solid var(--border-color);
+    color: var(--body-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.accessibility-btn:hover {
+    background: var(--theme-color);
+    color: white;
+    transform: scale(1.05);
+    border-color: var(--theme-color);
+}
+
+.accessibility-btn.active {
+    background: var(--theme-color);
+    color: white;
+    border-color: var(--theme-color);
+    animation: pulse 2s infinite;
+}
+
+.accessibility-status {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    border: 2px solid var(--theme-bg-color);
+}
+
+.accessibility-btn.active .accessibility-status {
+    background: #28a745;
+}
+
+.accessibility-panel {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 320px;
+    background: var(--theme-bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    display: none;
+    overflow: hidden;
+}
+
+.accessibility-panel.active {
+    display: block;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--theme-color);
+    color: white;
+}
+
+.panel-header h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.panel-close {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    padding: 4px;
+}
+
+.panel-close:hover {
+    opacity: 1;
+}
+
+.panel-status {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.indicator-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: background 0.3s;
+}
+
+.indicator-dot.active {
+    background: #28a745;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    animation: blink 2s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+.indicator-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--body-color);
+}
+
+.panel-content {
+    padding: 20px;
+}
+
+.voice-feedback {
+    background: var(--chat-text-bg);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 20px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.feedback-text {
+    font-size: 14px;
+    color: var(--body-color);
+    line-height: 1.4;
+}
+
+.commands-list h5 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--body-color);
+    font-weight: 600;
+}
+
+.commands-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.commands-list li {
+    font-size: 13px;
+    color: var(--grey-clr);
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.commands-list li:last-child {
+    border-bottom: none;
+}
+
+.commands-list li strong {
+    color: var(--theme-color);
+    font-weight: 600;
+}
+
+/* Dark mode adjustments */
+.dark-mode .accessibility-btn {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+}
+
+.dark-mode .accessibility-btn:hover {
+    background: var(--theme-color);
+}
+
+.dark-mode .accessibility-panel {
+    background: var(--theme-bg-color);
+    border-color: var(--border-color);
+}
+
+.dark-mode .voice-feedback {
+    background: var(--input-bg);
+}
+
+/* Mobile responsive */
+@media screen and (max-width: 768px) {
+    .accessibility-panel {
+        position: fixed;
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        width: auto;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .accessibility-toggle {
+        margin-left: 8px;
+    }
+    
+    .accessibility-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
