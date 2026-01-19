@@ -14,8 +14,6 @@ import re
 import os
 from apscheduler.schedulers.background import BackgroundScheduler
 
-
-
 app = Flask(__name__, template_folder='templates')
 app.config['SECRET_KEY'] = '2004'
 socketio = SocketIO(app)
