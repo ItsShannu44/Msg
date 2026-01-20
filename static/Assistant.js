@@ -450,9 +450,9 @@ class KwikChatAccessibility {
         const utterance = new SpeechSynthesisUtterance(text);
         
         // Female voice characteristics
-        utterance.rate = 1.0;     // Normal speed
-        utterance.pitch = 1.2;    // Higher pitch = more feminine
-        utterance.volume = 0.9;   // Slightly softer
+        utterance.rate = 1.0;  
+        utterance.pitch = 1.2;    
+        utterance.volume = 0.9;   
         
         // Get all available voices
         const voices = window.speechSynthesis.getVoices();
