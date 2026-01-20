@@ -133,11 +133,9 @@ This project was originally developed as a **BCA Final Year Project** and later 
 
 ---
 
-## 👨‍💻 Authors
+## 👨‍💻 Author
 
 - **Shanmukha Bhat**
-- Darshan K G  
-- Dishank S S  
 
 ---
 
