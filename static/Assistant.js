@@ -471,6 +471,8 @@ class KwikChatAccessibility {
     }
 }
 
+
+
     updateFeedback(text) {
         const feedback = document.getElementById('accessibilityFeedback');
         if (feedback) {
