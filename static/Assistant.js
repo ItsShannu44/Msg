@@ -82,8 +82,6 @@ class KwikChatAccessibility {
         setTimeout(() => {
             this.speak("KwikChat's Accessibility turned on.");
             this.updateFeedback("Accessibility mode active");
-            
-            // Ask about menu after another delay
             setTimeout(() => {
                 this.askForMenu();
             }, 3000);
