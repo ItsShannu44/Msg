@@ -99,10 +99,8 @@ class KwikChatAccessibility {
         indicator.classList.remove('active');
         statusText.textContent = 'Off';
         feedback.textContent = 'Accessibility turned off';
-        
+
         this.stopListening();
-        
-        // Speak confirmation
         this.speak("Accessibility turned off.");
         
         this.waitingForMenuResponse = false;
