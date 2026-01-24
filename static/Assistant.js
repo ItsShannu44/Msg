@@ -455,7 +455,6 @@ class KwikChatAccessibility {
         // Get all available voices
         const voices = window.speechSynthesis.getVoices();
         
-        // Look for female voices
         for (const voice of voices) {
             const name = voice.name.toLowerCase();
             if (name.includes('female') || name.includes('zira') || 
