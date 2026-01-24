@@ -490,4 +490,3 @@ if (document.querySelector('.chat-area')) {
         }, 1000);
     });
 }
-
