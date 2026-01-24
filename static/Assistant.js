@@ -447,7 +447,7 @@ class KwikChatAccessibility {
         
         const utterance = new SpeechSynthesisUtterance(text);
         
-        // Female voice characteristics
+        // Female voice 
         utterance.rate = 1.0;  
         utterance.pitch = 1.2;    
         utterance.volume = 0.9;   
