@@ -100,7 +100,6 @@ class KwikChatAccessibility {
         statusText.textContent = 'Off';
         feedback.textContent = 'Accessibility turned off';
         
-        // Stop listening
         this.stopListening();
         
         // Speak confirmation
