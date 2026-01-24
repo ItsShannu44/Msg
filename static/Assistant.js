@@ -16,7 +16,6 @@ class KwikChatAccessibility {
     }
 
     createAccessibilityUI() {
-        // Event listeners are already set up in HTML
         // Just ensure the panel is properly initialized
         const panel = document.getElementById('accessibilityPanel');
         const closeBtn = document.getElementById('closeAccessibilityPanel');
