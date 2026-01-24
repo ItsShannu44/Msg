@@ -1,4 +1,3 @@
-// KwikChat Accessibility
 class KwikChatAccessibility {
     constructor() {
         this.isActive = false;
@@ -346,7 +345,7 @@ class KwikChatAccessibility {
             this.restartMainListening();
         }
     }
-    
+
 
     readPreviousMessages() {
         const messageElements = document.querySelectorAll('.msg .msg-message');
