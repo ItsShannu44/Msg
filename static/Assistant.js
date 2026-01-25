@@ -293,7 +293,6 @@ class KwikChatAccessibility {
             return;
         }
         
-        
         // Stop main recognition temporarily
         if (this.recognition) {
             this.recognition.stop();
