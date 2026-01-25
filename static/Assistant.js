@@ -375,7 +375,6 @@ class KwikChatAccessibility {
             }, (index + 1) * 2000);
         });
     }
-
     sendMessage() {
         const sendButton = document.getElementById('send-button');
         const inputField = document.getElementById('TxtMessage');
