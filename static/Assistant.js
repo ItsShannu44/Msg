@@ -34,7 +34,7 @@ class KwikChatAccessibility {
         });
     }
 
-    
+
     setupKeyboardShortcut() {
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.key === 'a') {
@@ -340,7 +340,6 @@ class KwikChatAccessibility {
             return;
         }
         
-
         // Get last 3 messages
         const lastMessages = [];
         const startIndex = Math.max(0, messageElements.length - 3);
