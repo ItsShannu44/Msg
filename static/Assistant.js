@@ -74,8 +74,6 @@ class KwikChatAccessibility {
         // Show the panel
         const panel = document.getElementById('accessibilityPanel');
         panel.classList.add('active');
-        
-        // Start voice recognition
         this.startListening();
         
         // Speak announcement after a short delay
