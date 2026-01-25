@@ -429,6 +429,7 @@ class KwikChatAccessibility {
             }, 500);
         }
     }
+    
 
    speak(text, options = {}) {
     if (!this.isActive && !options.force) return;
