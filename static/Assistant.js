@@ -50,7 +50,6 @@ class KwikChatAccessibility {
         const panel = document.getElementById('accessibilityPanel');
         
         if (!this.isActive) {
-            // Turn ON accessibility
             this.activateAccessibility();
         } else {
             // Turn OFF accessibility
