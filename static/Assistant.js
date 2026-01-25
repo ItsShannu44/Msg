@@ -60,8 +60,6 @@ class KwikChatAccessibility {
 
     activateAccessibility() {
         this.isActive = true;
-        
-        // Update UI immediately
         const btn = document.getElementById('accessibilityBtn');
         const statusText = document.getElementById('accessibilityStatusText');
         const indicator = document.querySelector('.indicator-dot');
