@@ -52,7 +52,6 @@ class KwikChatAccessibility {
         if (!this.isActive) {
             this.activateAccessibility();
         } else {
-            // Turn OFF accessibility
             this.deactivateAccessibility();
         }
     }
