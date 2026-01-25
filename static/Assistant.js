@@ -248,8 +248,7 @@ class KwikChatAccessibility {
         }
         
         this.speak(`Opening chat with ${username}`);
-        
-        // Try to find and click user
+
         let found = false;
         const userLists = ['#recent-chats li', '#user-list li'];
         
