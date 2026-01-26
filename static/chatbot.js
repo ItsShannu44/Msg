@@ -66,7 +66,6 @@ class PremiumChatbotAssistant {
 
         this.checkForNotifications();
         
-        // Auto-focus input when opened
         this.container.addEventListener('transitionend', () => {
             if (this.isOpen) {
                 this.input.focus();
