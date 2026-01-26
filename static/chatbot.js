@@ -25,7 +25,6 @@ class PremiumChatbotAssistant {
     }
     
     initialize() {
-        // Load from localStorage
         this.loadHistory();
         this.loadPreferences();
         
