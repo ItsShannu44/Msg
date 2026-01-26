@@ -401,7 +401,6 @@ class PremiumChatbotAssistant {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         this.recognition = new SpeechRecognition();
         
-        // Premium settings
         this.recognition.continuous = false;
         this.recognition.interimResults = true;
         this.recognition.lang = 'en-US';
