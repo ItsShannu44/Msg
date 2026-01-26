@@ -8,12 +8,12 @@ class KwikChatAccessibility {
         this.waitingForMenuResponse = false;
         this.init();
     }
-
     init() {
         this.createAccessibilityUI();
         this.setupKeyboardShortcut();
     }
 
+    
     createAccessibilityUI() {
         const panel = document.getElementById('accessibilityPanel');
         const closeBtn = document.getElementById('closeAccessibilityPanel');
@@ -438,7 +438,7 @@ class KwikChatAccessibility {
         utterance.pitch = 1.2;    
         utterance.volume = 0.9;   
         
-        
+
         // Get  available voices
         const voices = window.speechSynthesis.getVoices();
         
