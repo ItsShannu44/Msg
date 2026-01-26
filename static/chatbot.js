@@ -169,7 +169,6 @@ class PremiumChatbotAssistant {
     }
     
     showMinimizedHint() {
-        // Add bounce animation to launcher
         this.launcher.style.animation = 'none';
         setTimeout(() => {
             this.launcher.style.animation = 'bounce 1s ease';
