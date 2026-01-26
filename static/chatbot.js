@@ -59,11 +59,9 @@ class PremiumChatbotAssistant {
             });
         });
         
-        // Input actions
         document.getElementById('chatbotAttach').addEventListener('click', () => this.showAttachOptions());
         document.getElementById('chatbotEmoji').addEventListener('click', () => this.showEmojiPicker());
         
-        // Add welcome message
         this.showWelcomeMessage();
 
         this.checkForNotifications();
