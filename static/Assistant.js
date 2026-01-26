@@ -438,6 +438,7 @@ class KwikChatAccessibility {
         utterance.pitch = 1.2;    
         utterance.volume = 0.9;   
         
+        
         // Get  available voices
         const voices = window.speechSynthesis.getVoices();
         
