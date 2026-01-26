@@ -123,7 +123,6 @@ class PremiumChatbotAssistant {
 
 
     setupThemeIntegration() {
-        // Watch for theme changes
         const observer = new MutationObserver(() => {
             this.updateThemeColors();
         });
@@ -132,8 +131,6 @@ class PremiumChatbotAssistant {
             attributes: true,
             attributeFilter: ['data-theme', 'class']
         });
-        
-        // Initial update
         this.updateThemeColors();
     }
     
