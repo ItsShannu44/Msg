@@ -145,8 +145,7 @@ class PremiumChatbotAssistant {
                 `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
                 '20, 72, 144';
         };
-        
-        // Update RGB variables
+
         document.documentElement.style.setProperty('--theme-color-rgb', hexToRgb(themeColor));
         document.documentElement.style.setProperty('--theme-glow-rgb', hexToRgb(themeGlow));
     }
