@@ -108,7 +108,6 @@ class PremiumChatbotAssistant {
                 cardsContainer.scrollBy({ left: 150, behavior: 'smooth' });
             });
             
-            // Show/hide arrows based on scroll position
             const updateArrows = () => {
                 const scrollLeft = cardsContainer.scrollLeft;
                 const maxScroll = cardsContainer.scrollWidth - cardsContainer.clientWidth;
