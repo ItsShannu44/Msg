@@ -213,7 +213,6 @@ class PremiumChatbotAssistant {
             // Get response
             const response = await this.getEnhancedResponse(message);
             
-            // Hide typing indicator
             this.hideTypingIndicator();
             
             // Add bot response with typing effect
