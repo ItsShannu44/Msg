@@ -94,7 +94,6 @@ class PremiumChatbotAssistant {
         });
     }
     
-    // Add this to your chatbot initialize() method
     setupSmartSuggestionsScrolling() {
         const cardsContainer = document.querySelector('.suggestion-cards');
         const leftArrow = document.querySelector('.scroll-indicator.left');
