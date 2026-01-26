@@ -43,7 +43,6 @@ class PremiumChatbotAssistant {
         
         this.micBtn.addEventListener('click', () => this.toggleVoiceInput());
         
-        // Suggestion cards
         document.querySelectorAll('.suggestion-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 const query = e.currentTarget.dataset.query;
