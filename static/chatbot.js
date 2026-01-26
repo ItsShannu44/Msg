@@ -139,7 +139,6 @@ class PremiumChatbotAssistant {
         const themeColor = style.getPropertyValue('--theme-color').trim();
         const themeGlow = style.getPropertyValue('--theme-glow').trim();
         
-        // Convert to RGB for CSS variables
         const hexToRgb = (hex) => {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? 
