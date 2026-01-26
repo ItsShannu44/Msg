@@ -198,8 +198,6 @@ class PremiumChatbotAssistant {
     async sendMessage() {
         const message = this.input.value.trim();
         if (!message) return;
-        
-        // Add user message
         this.addMessage(message, 'user');
         this.input.value = '';
         
