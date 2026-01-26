@@ -187,7 +187,6 @@ class PremiumChatbotAssistant {
             </div>
         `;
         this.messagesContainer.innerHTML = welcomeHtml;
-        // If there's history, add it after welcome message
         if (this.messageHistory.length > 0) {
             setTimeout(() => {
                 this.renderHistory();
