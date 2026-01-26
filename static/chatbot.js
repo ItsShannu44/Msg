@@ -135,7 +135,6 @@ class PremiumChatbotAssistant {
     }
     
     updateThemeColors() {
-        // Get current theme colors
         const style = getComputedStyle(document.body);
         const themeColor = style.getPropertyValue('--theme-color').trim();
         const themeGlow = style.getPropertyValue('--theme-glow').trim();
