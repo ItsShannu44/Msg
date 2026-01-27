@@ -454,6 +454,7 @@ class KwikChatAccessibility {
         }
     }
 }
+
 // Initialize when page loads
 if (document.querySelector('.chat-area')) {
     document.addEventListener('DOMContentLoaded', function() {
