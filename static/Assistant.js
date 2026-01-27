@@ -398,6 +398,7 @@ class KwikChatAccessibility {
             this.speak("Message cleared");
         }
     }
+    
 
     restartMainListening() {
         this.isListeningForMessage = false;
