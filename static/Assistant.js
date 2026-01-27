@@ -1,5 +1,5 @@
 class KwikChatAccessibility {
-    
+
     constructor() {
         this.isActive = false;
         this.recognition = null;
@@ -55,6 +55,7 @@ class KwikChatAccessibility {
         }
     }
 
+    
     activateAccessibility() {
         this.isActive = true;
         const btn = document.getElementById('accessibilityBtn');
