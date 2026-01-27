@@ -162,7 +162,6 @@ class KwikChatAccessibility {
             return;
         }
         
-        // TURN OFF COMMAND
         if (command.includes('turn off') || command.includes('off accessibility')) {
             this.speak("Turning off accessibility.");
             this.deactivateAccessibility();
