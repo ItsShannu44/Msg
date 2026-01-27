@@ -23,7 +23,6 @@ class KwikChatAccessibility {
             });
         }
 
-        // Close panel when clicking outside
         document.addEventListener('click', (e) => {
             const btn = document.getElementById('accessibilityBtn');
             if (!panel.contains(e.target) && !btn.contains(e.target)) {
