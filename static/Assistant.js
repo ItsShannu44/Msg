@@ -12,8 +12,6 @@ class KwikChatAccessibility {
         this.createAccessibilityUI();
         this.setupKeyboardShortcut();
     }
-
-    
     createAccessibilityUI() {
         const panel = document.getElementById('accessibilityPanel');
         const closeBtn = document.getElementById('closeAccessibilityPanel');
