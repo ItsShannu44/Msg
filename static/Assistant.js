@@ -188,6 +188,7 @@ class KwikChatAccessibility {
         else if (command.includes('clear') || command.includes('delete')) {
             this.clearInput();
         }
+        
         // HELP
         else if (command.includes('help') || command.includes('menu')) {
             this.showMenu();
