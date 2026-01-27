@@ -332,7 +332,6 @@ class KwikChatAccessibility {
             this.speak("No messages in this chat.");
             return;
         }
-        
         // Get last 3 messages
         const lastMessages = [];
         const startIndex = Math.max(0, messageElements.length - 3);
