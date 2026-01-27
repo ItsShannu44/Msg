@@ -65,7 +65,6 @@ class KwikChatAccessibility {
         indicator.classList.add('active');
         statusText.textContent = 'Listening';
         feedback.textContent = 'Starting accessibility...';
-        // Show the panel
         const panel = document.getElementById('accessibilityPanel');
         panel.classList.add('active');
         this.startListening();
