@@ -188,7 +188,7 @@ class KwikChatAccessibility {
         else if (command.includes('clear') || command.includes('delete')) {
             this.clearInput();
         }
-        
+
         // HELP
         else if (command.includes('help') || command.includes('menu')) {
             this.showMenu();
@@ -281,7 +281,6 @@ class KwikChatAccessibility {
             this.speak("Please open a chat first by saying: Open username");
             return;
         }
-        
         // Stop main recognition temporarily
         if (this.recognition) {
             this.recognition.stop();
