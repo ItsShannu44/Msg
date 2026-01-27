@@ -1,4 +1,5 @@
 class KwikChatAccessibility {
+    
     constructor() {
         this.isActive = false;
         this.recognition = null;
