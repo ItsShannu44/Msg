@@ -358,8 +358,7 @@ class KwikChatAccessibility {
         }
         
         this.speak(`Reading ${lastMessages.length} messages:`);
-        
-        // Read messages one by one
+
         lastMessages.forEach((msg, index) => {
             setTimeout(() => {
                 this.speak(`${msg.sender} said: ${msg.text}`, { noInterrupt: true });
