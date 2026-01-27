@@ -423,7 +423,6 @@ class KwikChatAccessibility {
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
-        
         // Female voice 
         utterance.rate = 1.0;  
         utterance.pitch = 1.2;    
