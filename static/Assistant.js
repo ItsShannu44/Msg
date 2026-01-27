@@ -55,7 +55,7 @@ class KwikChatAccessibility {
         }
     }
 
-    
+
     activateAccessibility() {
         this.isActive = true;
         const btn = document.getElementById('accessibilityBtn');
@@ -282,7 +282,6 @@ class KwikChatAccessibility {
             this.speak("Please open a chat first by saying: Open username");
             return;
         }
-        // Stop main recognition temporarily
         if (this.recognition) {
             this.recognition.stop();
         }
