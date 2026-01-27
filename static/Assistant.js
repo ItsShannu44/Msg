@@ -70,7 +70,6 @@ class KwikChatAccessibility {
         panel.classList.add('active');
         this.startListening();
         
-        // Speak announcement after a short delay
         setTimeout(() => {
             this.speak("KwikChat's Accessibility turned on.");
             this.updateFeedback("Accessibility mode active");
