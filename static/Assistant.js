@@ -352,6 +352,7 @@ class KwikChatAccessibility {
             }
         }
         
+        
         if (lastMessages.length === 0) {
             this.speak("No readable messages found.");
             return;
