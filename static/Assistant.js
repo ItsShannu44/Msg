@@ -378,7 +378,6 @@ class KwikChatAccessibility {
             this.speak("No message to send. Say 'type' to type a message first.");
             return;
         }
-
         sendButton.click();
         
         if (this.currentUser) {
