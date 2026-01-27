@@ -31,7 +31,6 @@ class KwikChatAccessibility {
         });
     }
 
-
     setupKeyboardShortcut() {
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.key === 'a') {
