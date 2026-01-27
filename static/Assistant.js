@@ -417,7 +417,6 @@ class KwikChatAccessibility {
         }
     }
     
-
    speak(text, options = {}) {
     if (!this.isActive && !options.force) return;
     
