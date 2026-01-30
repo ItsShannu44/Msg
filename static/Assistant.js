@@ -439,7 +439,6 @@ class KwikChatAccessibility {
         window.speechSynthesis.speak(utterance);
     }
 }
-
     updateFeedback(text) {
         const feedback = document.getElementById('accessibilityFeedback');
         if (feedback) {
