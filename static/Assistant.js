@@ -462,4 +462,3 @@ if (document.querySelector('.chat-area')) {
 
 
 
-
