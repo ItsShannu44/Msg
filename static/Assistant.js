@@ -299,12 +299,12 @@ class KwikChatAccessibility {
     }
 
     startVoiceTyping() {
+        this.speak("I'm listening for your message. Speak now.");
         if (!this.focusInput()) {
             this.speak("Please open a chat first by saying: Open username");
             return;
         }
         
-        this.speak("I'm listening for your message. Speak now.");
         
         // Stop main recognition temporarily
         if (this.recognition) {
