@@ -25,7 +25,6 @@ class PremiumChatbotAssistant {
     }
     
     initialize() {
-        // Load from localStorage
         this.loadHistory();
         this.loadPreferences();
         
@@ -44,7 +43,6 @@ class PremiumChatbotAssistant {
         
         this.micBtn.addEventListener('click', () => this.toggleVoiceInput());
         
-        // Suggestion cards
         document.querySelectorAll('.suggestion-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 const query = e.currentTarget.dataset.query;
@@ -61,16 +59,13 @@ class PremiumChatbotAssistant {
             });
         });
         
-        // Input actions
         document.getElementById('chatbotAttach').addEventListener('click', () => this.showAttachOptions());
         document.getElementById('chatbotEmoji').addEventListener('click', () => this.showEmojiPicker());
         
-        // Add welcome message
         this.showWelcomeMessage();
 
         this.checkForNotifications();
         
-        // Auto-focus input when opened
         this.container.addEventListener('transitionend', () => {
             if (this.isOpen) {
                 this.input.focus();
@@ -99,7 +94,6 @@ class PremiumChatbotAssistant {
         });
     }
     
-    // Add this to your chatbot initialize() method
     setupSmartSuggestionsScrolling() {
         const cardsContainer = document.querySelector('.suggestion-cards');
         const leftArrow = document.querySelector('.scroll-indicator.left');
@@ -114,7 +108,6 @@ class PremiumChatbotAssistant {
                 cardsContainer.scrollBy({ left: 150, behavior: 'smooth' });
             });
             
-            // Show/hide arrows based on scroll position
             const updateArrows = () => {
                 const scrollLeft = cardsContainer.scrollLeft;
                 const maxScroll = cardsContainer.scrollWidth - cardsContainer.clientWidth;
@@ -130,7 +123,6 @@ class PremiumChatbotAssistant {
 
 
     setupThemeIntegration() {
-        // Watch for theme changes
         const observer = new MutationObserver(() => {
             this.updateThemeColors();
         });
@@ -139,26 +131,21 @@ class PremiumChatbotAssistant {
             attributes: true,
             attributeFilter: ['data-theme', 'class']
         });
-        
-        // Initial update
         this.updateThemeColors();
     }
     
     updateThemeColors() {
-        // Get current theme colors
         const style = getComputedStyle(document.body);
         const themeColor = style.getPropertyValue('--theme-color').trim();
         const themeGlow = style.getPropertyValue('--theme-glow').trim();
         
-        // Convert to RGB for CSS variables
         const hexToRgb = (hex) => {
             const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return result ? 
                 `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` :
                 '20, 72, 144';
         };
-        
-        // Update RGB variables
+
         document.documentElement.style.setProperty('--theme-color-rgb', hexToRgb(themeColor));
         document.documentElement.style.setProperty('--theme-glow-rgb', hexToRgb(themeGlow));
     }
@@ -182,7 +169,6 @@ class PremiumChatbotAssistant {
     }
     
     showMinimizedHint() {
-        // Add bounce animation to launcher
         this.launcher.style.animation = 'none';
         setTimeout(() => {
             this.launcher.style.animation = 'bounce 1s ease';
@@ -201,7 +187,6 @@ class PremiumChatbotAssistant {
             </div>
         `;
         this.messagesContainer.innerHTML = welcomeHtml;
-        // If there's history, add it after welcome message
         if (this.messageHistory.length > 0) {
             setTimeout(() => {
                 this.renderHistory();
@@ -213,8 +198,6 @@ class PremiumChatbotAssistant {
     async sendMessage() {
         const message = this.input.value.trim();
         if (!message) return;
-        
-        // Add user message
         this.addMessage(message, 'user');
         this.input.value = '';
         
@@ -228,7 +211,6 @@ class PremiumChatbotAssistant {
             // Get response
             const response = await this.getEnhancedResponse(message);
             
-            // Hide typing indicator
             this.hideTypingIndicator();
             
             // Add bot response with typing effect
@@ -401,7 +383,6 @@ class PremiumChatbotAssistant {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         this.recognition = new SpeechRecognition();
         
-        // Premium settings
         this.recognition.continuous = false;
         this.recognition.interimResults = true;
         this.recognition.lang = 'en-US';

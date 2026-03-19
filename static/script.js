@@ -529,9 +529,6 @@ function setupMobileView() {
 
 
 
-
-
-
 document.addEventListener('DOMContentLoaded', function() {
     // Get modal and elements
     const agreementModal = document.getElementById('userAgreementModal');
@@ -995,6 +992,9 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+
+
 
 
 //////////////////////////////////ONLINE STATUS IN RECENTS/////////////

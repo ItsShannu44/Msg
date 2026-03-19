@@ -1,5 +1,5 @@
-// KwikChat Accessibility
 class KwikChatAccessibility {
+
     constructor() {
         this.isActive = false;
         this.recognition = null;
@@ -9,15 +9,11 @@ class KwikChatAccessibility {
         this.waitingForMenuResponse = false;
         this.init();
     }
-
     init() {
         this.createAccessibilityUI();
         this.setupKeyboardShortcut();
     }
-
     createAccessibilityUI() {
-        // Event listeners are already set up in HTML
-        // Just ensure the panel is properly initialized
         const panel = document.getElementById('accessibilityPanel');
         const closeBtn = document.getElementById('closeAccessibilityPanel');
         
@@ -27,8 +23,7 @@ class KwikChatAccessibility {
                 panel.classList.remove('active');
             });
         }
-        
-        // Close panel when clicking outside
+
         document.addEventListener('click', (e) => {
             const btn = document.getElementById('accessibilityBtn');
             if (!panel.contains(e.target) && !btn.contains(e.target)) {
@@ -54,18 +49,15 @@ class KwikChatAccessibility {
         const panel = document.getElementById('accessibilityPanel');
         
         if (!this.isActive) {
-            // Turn ON accessibility
             this.activateAccessibility();
         } else {
-            // Turn OFF accessibility
             this.deactivateAccessibility();
         }
     }
 
+
     activateAccessibility() {
         this.isActive = true;
-        
-        // Update UI immediately
         const btn = document.getElementById('accessibilityBtn');
         const statusText = document.getElementById('accessibilityStatusText');
         const indicator = document.querySelector('.indicator-dot');
@@ -75,20 +67,13 @@ class KwikChatAccessibility {
         indicator.classList.add('active');
         statusText.textContent = 'Listening';
         feedback.textContent = 'Starting accessibility...';
-        
-        // Show the panel
         const panel = document.getElementById('accessibilityPanel');
         panel.classList.add('active');
-        
-        // Start voice recognition
         this.startListening();
         
-        // Speak announcement after a short delay
         setTimeout(() => {
             this.speak("KwikChat's Accessibility turned on.");
             this.updateFeedback("Accessibility mode active");
-            
-            // Ask about menu after another delay
             setTimeout(() => {
                 this.askForMenu();
             }, 3000);
@@ -97,8 +82,6 @@ class KwikChatAccessibility {
 
     deactivateAccessibility() {
         this.isActive = false;
-        
-        // Update UI
         const btn = document.getElementById('accessibilityBtn');
         const statusText = document.getElementById('accessibilityStatusText');
         const indicator = document.querySelector('.indicator-dot');
@@ -108,11 +91,8 @@ class KwikChatAccessibility {
         indicator.classList.remove('active');
         statusText.textContent = 'Off';
         feedback.textContent = 'Accessibility turned off';
-        
-        // Stop listening
+
         this.stopListening();
-        
-        // Speak confirmation
         this.speak("Accessibility turned off.");
         
         this.waitingForMenuResponse = false;
@@ -184,7 +164,6 @@ class KwikChatAccessibility {
             return;
         }
         
-        // TURN OFF COMMAND
         if (command.includes('turn off') || command.includes('off accessibility')) {
             this.speak("Turning off accessibility.");
             this.deactivateAccessibility();
@@ -260,8 +239,7 @@ class KwikChatAccessibility {
         }
         
         this.speak(`Opening chat with ${username}`);
-        
-        // Try to find and click user
+
         let found = false;
         const userLists = ['#recent-chats li', '#user-list li'];
         
@@ -349,6 +327,7 @@ class KwikChatAccessibility {
         }
     }
 
+
     readPreviousMessages() {
         const messageElements = document.querySelectorAll('.msg .msg-message');
         
@@ -356,7 +335,6 @@ class KwikChatAccessibility {
             this.speak("No messages in this chat.");
             return;
         }
-        
         // Get last 3 messages
         const lastMessages = [];
         const startIndex = Math.max(0, messageElements.length - 3);
@@ -376,22 +354,20 @@ class KwikChatAccessibility {
                 });
             }
         }
-        
+
         if (lastMessages.length === 0) {
             this.speak("No readable messages found.");
             return;
         }
         
         this.speak(`Reading ${lastMessages.length} messages:`);
-        
-        // Read messages one by one
+
         lastMessages.forEach((msg, index) => {
             setTimeout(() => {
                 this.speak(`${msg.sender} said: ${msg.text}`, { noInterrupt: true });
             }, (index + 1) * 2000);
         });
     }
-
     sendMessage() {
         const sendButton = document.getElementById('send-button');
         const inputField = document.getElementById('TxtMessage');
@@ -405,7 +381,6 @@ class KwikChatAccessibility {
             this.speak("No message to send. Say 'type' to type a message first.");
             return;
         }
-        
         sendButton.click();
         
         if (this.currentUser) {
@@ -422,7 +397,6 @@ class KwikChatAccessibility {
             this.speak("Message cleared");
         }
     }
-
     restartMainListening() {
         this.isListeningForMessage = false;
         
@@ -440,7 +414,7 @@ class KwikChatAccessibility {
             }, 500);
         }
     }
-
+    
    speak(text, options = {}) {
     if (!this.isActive && !options.force) return;
     
@@ -448,16 +422,14 @@ class KwikChatAccessibility {
         window.speechSynthesis.cancel();
         
         const utterance = new SpeechSynthesisUtterance(text);
+        // Female voice 
+        utterance.rate = 1.0;  
+        utterance.pitch = 1.2;    
+        utterance.volume = 0.9;   
         
-        // Female voice characteristics
-        utterance.rate = 1.0;     // Normal speed
-        utterance.pitch = 1.2;    // Higher pitch = more feminine
-        utterance.volume = 0.9;   // Slightly softer
-        
-        // Get all available voices
+        // Get  available voices
         const voices = window.speechSynthesis.getVoices();
         
-        // Look for female voices
         for (const voice of voices) {
             const name = voice.name.toLowerCase();
             if (name.includes('female') || name.includes('zira') || 
@@ -470,7 +442,6 @@ class KwikChatAccessibility {
         window.speechSynthesis.speak(utterance);
     }
 }
-
     updateFeedback(text) {
         const feedback = document.getElementById('accessibilityFeedback');
         if (feedback) {
@@ -478,7 +449,6 @@ class KwikChatAccessibility {
         }
     }
 }
-
 // Initialize when page loads
 if (document.querySelector('.chat-area')) {
     document.addEventListener('DOMContentLoaded', function() {
